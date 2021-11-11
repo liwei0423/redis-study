@@ -219,25 +219,25 @@ public class RedisService {
      *
      * @param key
      * @param value
-     * @param scoure
+     * @param score
      */
-    public void zAdd(String key, Object value, double scoure) {
+    public void zAdd(String key, Object value, double score) {
         ZSetOperations<String, Object> zset = redisTemplate.opsForZSet();
-        zset.add(key, value, scoure);
+        zset.add(key, value, score);
     }
 
     /**
      * 有序集合获取
      *
      * @param key
-     * @param scoure
-     * @param scoure1
+     * @param score
+     * @param score1
      * @return
      */
-    public Set<Object> rangeByScore(String key, double scoure, double scoure1) {
+    public Set<Object> rangeByScore(String key, double score, double score1) {
         ZSetOperations<String, Object> zset = redisTemplate.opsForZSet();
         redisTemplate.opsForValue();
-        return zset.rangeByScore(key, scoure, scoure1);
+        return zset.rangeByScore(key, score, score1);
     }
 
     /**
@@ -280,11 +280,11 @@ public class RedisService {
      *
      * @param key
      * @param value
-     * @param scoure
+     * @param score
      */
-    public void incrementScore(String key, Object value, double scoure) {
+    public void incrementScore(String key, Object value, double score) {
         ZSetOperations<String, Object> zset = redisTemplate.opsForZSet();
-        zset.incrementScore(key, value, scoure);
+        zset.incrementScore(key, value, score);
     }
 
 
@@ -309,4 +309,16 @@ public class RedisService {
         Set<ZSetOperations.TypedTuple<Object>> ret = zset.reverseRangeWithScores(key, start, end);
         return ret;
     }
+
+    /**
+     * 有序集合获取排名
+     *
+     * @param key
+     */
+    public Set<ZSetOperations.TypedTuple<Object>> reverseRangeWithScores(String key){
+        Set<ZSetOperations.TypedTuple<Object>> typedTupleSet = redisTemplate.opsForZSet().reverseRangeWithScores(key,0,-1);
+        return typedTupleSet;
+    }
+
+
 }
