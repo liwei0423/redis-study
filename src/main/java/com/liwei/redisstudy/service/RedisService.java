@@ -145,6 +145,16 @@ public class RedisService {
     }
 
     /**
+     * 查找所有符合给定模式( pattern)的 key
+     *
+     * @param pattern
+     * @return
+     */
+    public Set<String> keys(String pattern) {
+        return redisTemplate.keys(pattern);
+    }
+
+    /**
      * 哈希 添加
      *
      * @param key
@@ -327,8 +337,8 @@ public class RedisService {
      *
      * @param key
      */
-    public Set<ZSetOperations.TypedTuple<Object>> reverseRangeWithScores(String key){
-        Set<ZSetOperations.TypedTuple<Object>> typedTupleSet = redisTemplate.opsForZSet().reverseRangeWithScores(key,0,-1);
+    public Set<ZSetOperations.TypedTuple<Object>> reverseRangeWithScores(String key) {
+        Set<ZSetOperations.TypedTuple<Object>> typedTupleSet = redisTemplate.opsForZSet().reverseRangeWithScores(key, 0, -1);
         return typedTupleSet;
     }
 

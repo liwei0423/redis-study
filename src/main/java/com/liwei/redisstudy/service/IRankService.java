@@ -8,10 +8,18 @@ package com.liwei.redisstudy.service;
 public interface IRankService {
 
     /**
-     *  获取最后一名的名次
+     *  执行入围排名，可定时30s调用一次
      *
-     * @param key
+     * @param
      * @return
      */
-    Integer getLastRank(String key);
+    boolean executeRank();
+
+    /**
+     *  获取学校最后一名的名次
+     *
+     * @param schoolRankKey
+     * @return
+     */
+    Integer getLastRank(String schoolRankKey);
 }

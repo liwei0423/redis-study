@@ -7,9 +7,7 @@ import com.liwei.redisstudy.service.RedisService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.redis.core.ZSetOperations;
 
-import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -27,19 +25,30 @@ public class StudentRankTest {
 
     @Test
     public void studentScore() {
-        redisService.zAdd(RedisConstant.KEY_ZSET_STUDENT_SCORE, "1", 80f);
-        redisService.zAdd(RedisConstant.KEY_ZSET_STUDENT_SCORE, "2", 82f);
-        redisService.zAdd(RedisConstant.KEY_ZSET_STUDENT_SCORE, "3", 81f);
-        redisService.zAdd(RedisConstant.KEY_ZSET_STUDENT_SCORE, "4", 86f);
-        redisService.zAdd(RedisConstant.KEY_ZSET_STUDENT_SCORE, "5", 88f);
-        redisService.zAdd(RedisConstant.KEY_ZSET_STUDENT_SCORE, "6", 72f);
-        redisService.zAdd(RedisConstant.KEY_ZSET_STUDENT_SCORE, "7", 75f);
-        redisService.zAdd(RedisConstant.KEY_ZSET_STUDENT_SCORE, "8", 60f);
-        redisService.zAdd(RedisConstant.KEY_ZSET_STUDENT_SCORE, "9", 95f);
+        String studentScoreKey = RedisConstant.KEY_ZSET_STUDENT_SCORE;
+        if (redisService.exists(studentScoreKey)) {
+            redisService.remove(studentScoreKey);
+        }
+        redisService.zAdd(studentScoreKey, "1", 80f);
+        redisService.zAdd(studentScoreKey, "2", 82f);
+        redisService.zAdd(studentScoreKey, "3", 81f);
+        redisService.zAdd(studentScoreKey, "4", 86f);
+        redisService.zAdd(studentScoreKey, "5", 88f);
+        redisService.zAdd(studentScoreKey, "6", 72f);
+        redisService.zAdd(studentScoreKey, "7", 75f);
+        redisService.zAdd(studentScoreKey, "8", 60f);
+        redisService.zAdd(studentScoreKey, "9", 95f);
     }
 
     @Test
     public void studentVolunteer() {
+        String pattern = RedisKeyBuilder.getKeyHashStudent("*");
+        Set<String> sets = redisService.keys(pattern);
+        for(String key:sets){
+            //TODO 批量删除
+            redisService.remove(key);
+        }
+
         redisService.hmSet(RedisKeyBuilder.getKeyHashStudent("1"), "11", false);
         redisService.hmSet(RedisKeyBuilder.getKeyHashStudent("1"), "22", false);
 
@@ -70,42 +79,22 @@ public class StudentRankTest {
 
     @Test
     public void schoolRecruit() {
+        String pattern = RedisKeyBuilder.getKeyHashSchool("*");
+        Set<String> sets = redisService.keys(pattern);
+        for(String key:sets){
+            //TODO 批量删除
+            redisService.remove(key);
+        }
+
         redisService.hmSet(RedisKeyBuilder.getKeyHashSchool("11"), "personNum", 3);
         redisService.hmSet(RedisKeyBuilder.getKeyHashSchool("22"), "personNum", 3);
         redisService.hmSet(RedisKeyBuilder.getKeyHashSchool("33"), "personNum", 3);
     }
 
     @Test
-    public void rank() {
-        //学生由高到底
-        Set<ZSetOperations.TypedTuple<Object>> result = redisService.reverseRangeWithScores(RedisConstant.KEY_ZSET_STUDENT_SCORE);
-        Iterator<ZSetOperations.TypedTuple<Object>> iterator = result.iterator();
-        while (iterator.hasNext()) {
-            ZSetOperations.TypedTuple<Object> typedTuple = iterator.next();
-            String userId = String.valueOf(typedTuple.getValue());
-            double totalScore = typedTuple.getScore();
-            //学生志愿信息
-            String studentKey = RedisKeyBuilder.getKeyHashStudent(userId);
-            Set<Object> hashKeys = redisService.hmHashKeys(studentKey);
-            for (Object object : hashKeys) {
-                //志愿校
-                String schoolId = (String) object;
-                //学校信息key
-                String schoolKey = RedisKeyBuilder.getKeyHashSchool(schoolId);
-                Object personNumObject = redisService.hmGet(schoolKey, RedisConstant.PROPS_PERSON_NUM);
-                //获取招生人数
-                Integer personNum = personNumObject == null ? 0 : (Integer) personNumObject;
-                //学校投档key
-                String schoolRankKey = RedisKeyBuilder.getKeyZsetSchoolRank(schoolId);
-                Integer lastRank = rankService.getLastRank(schoolRankKey);
-                if (lastRank < personNum) {
-                    //入围
-                    redisService.zAdd(schoolRankKey, userId, totalScore);
-                    redisService.hmSet(studentKey, schoolId, true);
-                    break;
-                }
-            }
-        }
+    public void executeRank() {
+        boolean flag = rankService.executeRank();
+        System.out.println("return=" + flag);
     }
 
 }
