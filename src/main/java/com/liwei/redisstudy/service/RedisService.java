@@ -169,6 +169,18 @@ public class RedisService {
     }
 
     /**
+     * 哈希获取hashKeys
+     *
+     * @param key
+     * @return
+     */
+    public Set<Object> hmHashKeys(String key) {
+        HashOperations<String, Object, Object> hash = redisTemplate.opsForHash();
+        return hash.keys(key);
+    }
+
+
+    /**
      * 列表添加
      *
      * @param k
@@ -320,5 +332,6 @@ public class RedisService {
         return typedTupleSet;
     }
 
-
 }
+
+

@@ -36,7 +36,7 @@ public class RedisController {
     public String ranklist(String key) {
         Set<ZSetOperations.TypedTuple<Object>> result = redisService.reverseRangeWithScores(key);
         Map<Object, Integer> rankMap = new LinkedHashMap<>();
-        changeRank(result, rankMap);
+        ranking(result, rankMap);
         System.out.println("--------");
         StringBuffer sb = new StringBuffer();
         for (Object item : rankMap.keySet()) {
@@ -51,7 +51,7 @@ public class RedisController {
         Integer rank = -1;
         Set<ZSetOperations.TypedTuple<Object>> result = redisService.reverseRangeWithScores(key);
         Map<Object, Integer> rankMap = new LinkedHashMap<>();
-        changeRank(result, rankMap);
+        ranking(result, rankMap);
         System.out.println("--------");
         StringBuffer sb = new StringBuffer();
         for (Object item : rankMap.keySet()) {
@@ -64,7 +64,7 @@ public class RedisController {
     }
 
 
-    public Map<Object, Integer> changeRank(Set<ZSetOperations.TypedTuple<Object>> result, Map<Object, Integer> rankMap) {
+    public Map<Object, Integer> ranking(Set<ZSetOperations.TypedTuple<Object>> result, Map<Object, Integer> rankMap) {
 
         double lastScore = -1.0;
         Integer rank = 0;
