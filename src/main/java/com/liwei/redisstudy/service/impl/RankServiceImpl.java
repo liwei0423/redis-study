@@ -17,11 +17,14 @@ import java.util.*;
  */
 @Service
 public class RankServiceImpl implements IRankService {
+
     @Autowired
     private RedisService redisService;
 
     @Override
     public boolean executeRank() {
+        //初始化
+        initRank();
         //学生由高到底
         Set<ZSetOperations.TypedTuple<Object>> result = redisService.reverseRangeWithScores(RedisConstant.KEY_ZSET_STUDENT_SCORE);
         Iterator<ZSetOperations.TypedTuple<Object>> iterator = result.iterator();
@@ -54,6 +57,32 @@ public class RankServiceImpl implements IRankService {
         return true;
     }
 
+    /**
+     * 初始化排名，清理学生入围信息和学校已有排名
+     *
+     * @param
+     * @return
+     */
+    private void initRank() {
+        String pattern = RedisKeyBuilder.getKeyHashStudent("*");
+        Set<String> sets = redisService.keys(pattern);
+        for (String studentKey : sets) {
+            Set<Object> hashKeys = redisService.hmHashKeys(studentKey);
+            for (Object object : hashKeys) {
+                String schoolId = (String) object;
+                //todo 批量更新
+                redisService.hmSet(studentKey, schoolId, false);
+            }
+        }
+
+        String schoolRankPattern = RedisKeyBuilder.getKeyZsetSchoolRank("*");
+        Set<String> schoolRankSets = redisService.keys(schoolRankPattern);
+        for (String key : schoolRankSets) {
+            //TODO 批量删除
+            redisService.remove(key);
+        }
+    }
+
     @Override
     public Integer getLastRank(String key) {
         Set<ZSetOperations.TypedTuple<Object>> result = redisService.reverseRangeWithScores(key);
@@ -68,7 +97,7 @@ public class RankServiceImpl implements IRankService {
      * @param rankMap 排名集合
      * @return
      */
-    public static Integer ranking(Set<ZSetOperations.TypedTuple<Object>> result, Map<Object, Integer> rankMap) {
+    private static Integer ranking(Set<ZSetOperations.TypedTuple<Object>> result, Map<Object, Integer> rankMap) {
         double lastScore = -1.0;
         Integer rank = 0;
         Iterator<ZSetOperations.TypedTuple<Object>> iterator = result.iterator();
