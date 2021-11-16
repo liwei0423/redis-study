@@ -5,7 +5,9 @@ import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -246,6 +248,24 @@ public class RedisService {
     public void zAdd(String key, Object value, double score) {
         ZSetOperations<String, Object> zset = redisTemplate.opsForZSet();
         zset.add(key, value, score);
+    }
+
+    /**
+     * 有序集合批量添加
+     *
+     * @param key
+     * @param map
+     */
+    public void zBatchAdd(String key, Map<String, Double> map) {
+        ZSetOperations<String, Object> zset = redisTemplate.opsForZSet();
+        ZSetOperations.TypedTuple<Object> typedTuple;
+        Set<ZSetOperations.TypedTuple<Object>> tuples = new LinkedHashSet<>();
+        for (String member : map.keySet()) {
+            Double score = map.get(member);
+            typedTuple = ZSetOperations.TypedTuple.of(member, score);
+            tuples.add(typedTuple);
+        }
+        zset.add(key, tuples);
     }
 
     /**

@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -91,6 +93,20 @@ public class StudentRankTest {
         redisService.hmSet(RedisKeyBuilder.getKeyHashSchool(examId, "11"), "personNum", 3);
         redisService.hmSet(RedisKeyBuilder.getKeyHashSchool(examId, "22"), "personNum", 3);
         redisService.hmSet(RedisKeyBuilder.getKeyHashSchool(examId, "33"), "personNum", 3);
+    }
+
+    @Test
+    public void testZsetBatchAdd() {
+        String studentScoreKey = RedisKeyBuilder.getKeyZsetStudentScore(examId);
+        Map<String, Double> map = new HashMap<>();
+        map.put("1", 80.0);
+        map.put("2", 81.0);
+        redisService.zBatchAdd(studentScoreKey, map);
+    }
+
+    @Test
+    public void clear() {
+        rankService.clearMemory(examId);
     }
 
     @Test

@@ -23,7 +23,7 @@ public interface IRankService {
     boolean initMemory(String examId, Map<String, Double> studentScoreList, Map<String, Integer> schoolPersonNumList);
 
     /**
-     *  清理内存，投档完成可调用
+     *  清理内存，投档完成可调用释放资源
      *
      * @param examId
      * @return
@@ -77,7 +77,7 @@ public interface IRankService {
     void studentWill(String examId, String userId, List<String> schoolList);
 
     /**
-     * 更新学生的分数
+     * 更改学生的分数
      *
      * @param examId
      * @param userId
@@ -87,7 +87,7 @@ public interface IRankService {
     void updateStudentScore(String examId, String userId, double score);
 
     /**
-     * 更新学校招生人数
+     * 更改学校招生人数
      *
      * @param examId
      * @param schoolId

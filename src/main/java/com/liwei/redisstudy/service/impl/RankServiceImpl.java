@@ -27,11 +27,7 @@ public class RankServiceImpl implements IRankService {
     @Override
     public boolean initMemory(String examId, Map<String, Double> studentScoreList, Map<String, Integer> schoolPersonNumList) {
         String studentScoreKey = RedisKeyBuilder.getKeyZsetStudentScore(examId);
-        for (String userId : studentScoreList.keySet()) {
-            //todo 批量添加
-            double score = studentScoreList.get(userId);
-            redisService.zAdd(studentScoreKey, userId, score);
-        }
+        redisService.zBatchAdd(studentScoreKey, studentScoreList);
         for (String schoolId : schoolPersonNumList.keySet()) {
             //todo 批量添加
             Integer personNum = schoolPersonNumList.get(schoolId);
@@ -55,6 +51,12 @@ public class RankServiceImpl implements IRankService {
         String keyHashSchoolPattern = RedisKeyBuilder.getKeyHashSchool(examId, "*");
         Set<String> schoolSet = redisService.keys(keyHashSchoolPattern);
         for (String key : schoolSet) {
+            //TODO 批量删除
+            redisService.remove(key);
+        }
+        String keyZsetSchoolRankPattern = RedisKeyBuilder.getKeyZsetSchoolRank(examId, "*");
+        Set<String> schoolRankSets = redisService.keys(keyZsetSchoolRankPattern);
+        for (String key : schoolRankSets) {
             //TODO 批量删除
             redisService.remove(key);
         }
