@@ -148,7 +148,7 @@ public class RankServiceImpl implements IRankService {
 
     @Override
     public void updateSchoolInfo(String examId, String schoolId, Integer personNum) {
-
+        redisService.hmSet(RedisKeyBuilder.getKeyHashSchool(examId, schoolId), RedisConstant.PROPS_PERSON_NUM, personNum);
     }
 
     /**

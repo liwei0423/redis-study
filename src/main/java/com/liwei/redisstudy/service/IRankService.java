@@ -22,7 +22,7 @@ public interface IRankService {
     /**
      * 执行入围排名，可定时30s调用一次
      *
-     * @param
+     * @param examId
      * @return
      */
     boolean executeRank(String examId);
@@ -30,6 +30,7 @@ public interface IRankService {
     /**
      * 获取学校入围最后一名的学生信息
      *
+     * @param examId
      * @param schoolId
      * @return
      */
@@ -38,6 +39,7 @@ public interface IRankService {
     /**
      * 获取学生在学校的名次
      *
+     * @param examId
      * @param schoolId
      * @param userId
      * @return -1 未入围
@@ -47,6 +49,7 @@ public interface IRankService {
     /**
      * 获取学校入围学生清单
      *
+     * @param examId
      * @param schoolId
      * @return
      */
@@ -55,6 +58,7 @@ public interface IRankService {
     /**
      * 学生提交志愿
      *
+     * @param examId
      * @param userId
      * @param schoolList
      * @return
@@ -64,6 +68,7 @@ public interface IRankService {
     /**
      * 更新学生的分数
      *
+     * @param examId
      * @param userId
      * @param score
      * @return
@@ -73,6 +78,7 @@ public interface IRankService {
     /**
      * 更新学校招生人数
      *
+     * @param examId
      * @param schoolId
      * @param personNum
      * @return
