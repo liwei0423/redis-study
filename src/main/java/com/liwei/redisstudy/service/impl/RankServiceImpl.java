@@ -43,8 +43,8 @@ public class RankServiceImpl implements IRankService {
             redisService.remove(studentScoreKey);
         }
         String keyHashStudentPattern = RedisKeyBuilder.getKeyHashStudent(examId, "*");
-        Set<String> studentScoreSets = redisService.keys(keyHashStudentPattern);
-        for (String key : studentScoreSets) {
+        Set<String> studentSets = redisService.keys(keyHashStudentPattern);
+        for (String key : studentSets) {
             //TODO 批量删除
             redisService.remove(key);
         }
@@ -109,11 +109,12 @@ public class RankServiceImpl implements IRankService {
         Set<String> sets = redisService.keys(pattern);
         for (String studentKey : sets) {
             Set<Object> hashKeys = redisService.hmHashKeys(studentKey);
+            Map<Object, Object> map = new LinkedHashMap<>();
             for (Object object : hashKeys) {
                 String schoolId = (String) object;
-                //todo 批量更新
-                redisService.hmSet(studentKey, schoolId, false);
+                map.put(schoolId, false);
             }
+            redisService.hmBatchSet(studentKey, map);
         }
 
         String schoolRankPattern = RedisKeyBuilder.getKeyZsetSchoolRank(examId, "*");

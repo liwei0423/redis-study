@@ -112,7 +112,7 @@ public class RedisService {
 
 
     /**
-     * 删除对应的value
+     * 删除对应的key
      *
      * @param key
      */
@@ -166,6 +166,17 @@ public class RedisService {
     public void hmSet(String key, Object hashKey, Object value) {
         HashOperations<String, Object, Object> hash = redisTemplate.opsForHash();
         hash.put(key, hashKey, value);
+    }
+
+    /**
+     * 哈希 同时将多个 field-value添加哈希表 key 中
+     *
+     * @param key
+     * @param map
+     */
+    public void hmBatchSet(String key, Map<Object, Object> map) {
+        HashOperations<String, Object, Object> hash = redisTemplate.opsForHash();
+        hash.putAll(key, map);
     }
 
     /**
