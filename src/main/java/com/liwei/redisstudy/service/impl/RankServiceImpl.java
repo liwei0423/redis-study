@@ -25,8 +25,39 @@ public class RankServiceImpl implements IRankService {
     private RedisService redisService;
 
     @Override
-    public boolean initRank(String examId) {
-        //todo 内存初始化学生分数
+    public boolean initMemory(String examId, Map<String, Double> studentScoreList, Map<String, Integer> schoolPersonNumList) {
+        String studentScoreKey = RedisKeyBuilder.getKeyZsetStudentScore(examId);
+        for (String userId : studentScoreList.keySet()) {
+            //todo 批量添加
+            double score = studentScoreList.get(userId);
+            redisService.zAdd(studentScoreKey, userId, score);
+        }
+        for (String schoolId : schoolPersonNumList.keySet()) {
+            //todo 批量添加
+            Integer personNum = schoolPersonNumList.get(schoolId);
+            redisService.hmSet(RedisKeyBuilder.getKeyHashSchool(examId, schoolId), RedisConstant.PROPS_PERSON_NUM, personNum);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean clearMemory(String examId) {
+        String studentScoreKey = RedisKeyBuilder.getKeyZsetStudentScore(examId);
+        if (redisService.exists(studentScoreKey)) {
+            redisService.remove(studentScoreKey);
+        }
+        String keyHashStudentPattern = RedisKeyBuilder.getKeyHashStudent(examId, "*");
+        Set<String> studentScoreSets = redisService.keys(keyHashStudentPattern);
+        for (String key : studentScoreSets) {
+            //TODO 批量删除
+            redisService.remove(key);
+        }
+        String keyHashSchoolPattern = RedisKeyBuilder.getKeyHashSchool(examId, "*");
+        Set<String> schoolSet = redisService.keys(keyHashSchoolPattern);
+        for (String key : schoolSet) {
+            //TODO 批量删除
+            redisService.remove(key);
+        }
         return true;
     }
 
@@ -131,7 +162,7 @@ public class RankServiceImpl implements IRankService {
     }
 
     @Override
-    public void studentSubmitWill(String examId, String userId, List<String> schoolList) {
+    public void studentWill(String examId, String userId, List<String> schoolList) {
         String keyHashStudent = RedisKeyBuilder.getKeyHashStudent(examId, userId);
         for (String schoolId : schoolList) {
             redisService.hmSet(keyHashStudent, schoolId, false);
@@ -178,5 +209,6 @@ public class RankServiceImpl implements IRankService {
         }
         return new StudentRankVO(userId, rank);
     }
+
 
 }
