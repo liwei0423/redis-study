@@ -12,6 +12,14 @@ import java.util.List;
 public interface IRankService {
 
     /**
+     * 内存初始化，只调用一次
+     *
+     * @param
+     * @return
+     */
+    boolean initRank();
+
+    /**
      * 执行入围排名，可定时30s调用一次
      *
      * @param
@@ -44,4 +52,12 @@ public interface IRankService {
      */
     List<String> schoolStudentList(String schoolId);
 
+    /**
+     *  学生提交志愿
+     *
+     * @param userId
+     * @param schoolList
+     * @return
+     */
+    void studentSubmitWill(String userId, List<String> schoolList);
 }

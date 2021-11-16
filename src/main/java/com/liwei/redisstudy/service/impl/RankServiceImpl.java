@@ -25,9 +25,15 @@ public class RankServiceImpl implements IRankService {
     private RedisService redisService;
 
     @Override
+    public boolean initRank() {
+        //todo 内存初始化学生分数
+        return true;
+    }
+
+    @Override
     public boolean executeRank() {
         //初始化
-        initRank();
+        init();
         //学生由高到底
         Set<ZSetOperations.TypedTuple<Object>> result = redisService.reverseRangeWithScores(RedisConstant.KEY_ZSET_STUDENT_SCORE);
         Iterator<ZSetOperations.TypedTuple<Object>> iterator = result.iterator();
@@ -60,12 +66,12 @@ public class RankServiceImpl implements IRankService {
     }
 
     /**
-     * 初始化排名，清理学生入围信息和学校已有排名
+     * 初始化，清理学生入围信息和学校已有排名
      *
      * @param
      * @return
      */
-    private void initRank() {
+    private void init() {
         String pattern = RedisKeyBuilder.getKeyHashStudent("*");
         Set<String> sets = redisService.keys(pattern);
         for (String studentKey : sets) {
@@ -122,6 +128,14 @@ public class RankServiceImpl implements IRankService {
             list.add(value);
         }
         return list;
+    }
+
+    @Override
+    public void studentSubmitWill(String userId, List<String> schoolList) {
+        String keyHashStudent = RedisKeyBuilder.getKeyHashStudent(userId);
+        for (String schoolId : schoolList) {
+            redisService.hmSet(keyHashStudent, schoolId, false);
+        }
     }
 
     /**
