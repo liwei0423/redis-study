@@ -5,6 +5,7 @@ import com.liwei.redisstudy.constant.RedisKeyBuilder;
 import com.liwei.redisstudy.service.IRankService;
 import com.liwei.redisstudy.service.RedisService;
 import com.liwei.redisstudy.vo.StudentRankVO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.util.*;
  * @author: liwei
  * @date: 2021/11/15
  */
+@Slf4j
 @Service
 public class RankServiceImpl implements IRankService {
 
@@ -45,8 +47,8 @@ public class RankServiceImpl implements IRankService {
                 //获取招生人数
                 Integer personNum = personNumObject == null ? 0 : (Integer) personNumObject;
                 //学校投档key
-                Integer lastRank = executeSchoolLastRank(schoolId);
-                if (lastRank < personNum) {
+                StudentRankVO studentRankVO = getSchoolLastRank(schoolId);
+                if (studentRankVO.getRank() < personNum) {
                     //入围
                     redisService.zAdd(RedisKeyBuilder.getKeyZsetSchoolRank(schoolId), userId, totalScore);
                     redisService.hmSet(studentKey, schoolId, true);
@@ -84,7 +86,7 @@ public class RankServiceImpl implements IRankService {
     }
 
     @Override
-    public Integer executeSchoolLastRank(String schoolId) {
+    public StudentRankVO getSchoolLastRank(String schoolId) {
         String schoolRankKey = RedisKeyBuilder.getKeyZsetSchoolRank(schoolId);
         Set<ZSetOperations.TypedTuple<Object>> result = redisService.reverseRangeWithScores(schoolRankKey);
         Map<Object, Integer> rankMap = new LinkedHashMap<>();
@@ -122,12 +124,6 @@ public class RankServiceImpl implements IRankService {
         return list;
     }
 
-    @Override
-    public StudentRankVO getSchoolLastRank(String schoolId) {
-        //todo 记录在学校信息
-        return null;
-    }
-
     /**
      * 非连续排名
      *
@@ -135,24 +131,25 @@ public class RankServiceImpl implements IRankService {
      * @param rankMap 排名集合
      * @return
      */
-    private static Integer ranking(Set<ZSetOperations.TypedTuple<Object>> result, Map<Object, Integer> rankMap) {
+    private static StudentRankVO ranking(Set<ZSetOperations.TypedTuple<Object>> result, Map<Object, Integer> rankMap) {
         double lastScore = -1.0;
         Integer rank = 0;
+        String userId = null;
         Iterator<ZSetOperations.TypedTuple<Object>> iterator = result.iterator();
         while (iterator.hasNext()) {
             ZSetOperations.TypedTuple<Object> typedTuple = iterator.next();
-            String value = String.valueOf(typedTuple.getValue());
+            userId = String.valueOf(typedTuple.getValue());
             double currentScore = typedTuple.getScore();
-            System.out.println(value + "->" + currentScore);
+            log.debug(userId + "->" + currentScore);
             if (!Objects.equals(lastScore, currentScore)) {
-                rankMap.put(value, ++rank);
+                rankMap.put(userId, ++rank);
             } else {
                 //并列
-                rankMap.put(value, rank++);
+                rankMap.put(userId, rank++);
             }
             lastScore = typedTuple.getScore();
         }
-        return rank;
+        return new StudentRankVO(userId, rank);
     }
 
 }

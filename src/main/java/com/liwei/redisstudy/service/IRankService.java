@@ -5,7 +5,7 @@ import com.liwei.redisstudy.vo.StudentRankVO;
 import java.util.List;
 
 /**
- * @description:
+ * @description: 排名服务类
  * @author: liwei
  * @date: 2021/11/15
  */
@@ -20,15 +20,15 @@ public interface IRankService {
     boolean executeRank();
 
     /**
-     * 计算学校入围最后一名的学生
+     * 获取学校入围最后一名的学生信息
      *
      * @param schoolId
      * @return
      */
-    Integer executeSchoolLastRank(String schoolId);
+    StudentRankVO getSchoolLastRank(String schoolId);
 
     /**
-     * 获取用户在学校的名次
+     * 获取学生在学校的名次
      *
      * @param schoolId
      * @param userId
@@ -37,18 +37,11 @@ public interface IRankService {
     Integer mySchoolRank(String schoolId, String userId);
 
     /**
-     * 学校入围学生清单
-     *
-     * @param
-     * @return
-     */
-    List<String> schoolStudentList(String schoolId);
-
-    /**
-     * 获取学校入围最后一名的学生信息
+     * 获取学校入围学生清单
      *
      * @param schoolId
      * @return
      */
-    StudentRankVO getSchoolLastRank(String schoolId);
+    List<String> schoolStudentList(String schoolId);
+
 }
