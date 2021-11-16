@@ -1,6 +1,5 @@
 package com.liwei.redisstudy;
 
-import com.liwei.redisstudy.constant.RedisConstant;
 import com.liwei.redisstudy.constant.RedisKeyBuilder;
 import com.liwei.redisstudy.service.IRankService;
 import com.liwei.redisstudy.service.RedisService;
@@ -23,9 +22,12 @@ public class StudentRankTest {
     @Autowired
     private IRankService rankService;
 
+    private final String examId = "1111";
+
     @Test
     public void studentScore() {
-        String studentScoreKey = RedisConstant.KEY_ZSET_STUDENT_SCORE;
+
+        String studentScoreKey = RedisKeyBuilder.getKeyZsetStudentScore(examId);
         if (redisService.exists(studentScoreKey)) {
             redisService.remove(studentScoreKey);
         }
@@ -42,58 +44,58 @@ public class StudentRankTest {
 
     @Test
     public void studentVolunteer() {
-        String pattern = RedisKeyBuilder.getKeyHashStudent("*");
+        String pattern = RedisKeyBuilder.getKeyHashStudent(examId, "*");
         Set<String> sets = redisService.keys(pattern);
-        for(String key:sets){
+        for (String key : sets) {
             //TODO 批量删除
             redisService.remove(key);
         }
 
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent("1"), "11", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent("1"), "22", false);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "1"), "11", false);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "1"), "22", false);
 
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent("2"), "22", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent("2"), "33", false);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "2"), "22", false);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "2"), "33", false);
 
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent("3"), "33", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent("3"), "22", false);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "3"), "33", false);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "3"), "22", false);
 
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent("4"), "11", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent("4"), "22", false);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "4"), "11", false);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "4"), "22", false);
 
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent("5"), "11", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent("5"), "33", false);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "5"), "11", false);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "5"), "33", false);
 
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent("6"), "22", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent("6"), "33", false);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "6"), "22", false);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "6"), "33", false);
 
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent("7"), "22", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent("7"), "33", false);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "7"), "22", false);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "7"), "33", false);
 
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent("8"), "22", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent("8"), "11", false);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "8"), "22", false);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "8"), "11", false);
 
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent("9"), "22", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent("9"), "33", false);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "9"), "22", false);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "9"), "33", false);
     }
 
     @Test
     public void schoolRecruit() {
-        String pattern = RedisKeyBuilder.getKeyHashSchool("*");
+        String pattern = RedisKeyBuilder.getKeyHashSchool(examId, "*");
         Set<String> sets = redisService.keys(pattern);
-        for(String key:sets){
+        for (String key : sets) {
             //TODO 批量删除
             redisService.remove(key);
         }
 
-        redisService.hmSet(RedisKeyBuilder.getKeyHashSchool("11"), "personNum", 3);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashSchool("22"), "personNum", 3);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashSchool("33"), "personNum", 3);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashSchool(examId, "11"), "personNum", 3);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashSchool(examId, "22"), "personNum", 3);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashSchool(examId, "33"), "personNum", 3);
     }
 
     @Test
     public void executeRank() {
-        boolean flag = rankService.executeRank();
+        boolean flag = rankService.executeRank(examId);
         System.out.println("return=" + flag);
     }
 

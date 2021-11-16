@@ -14,10 +14,10 @@ public interface IRankService {
     /**
      * 内存初始化，只调用一次
      *
-     * @param
+     * @param examId
      * @return
      */
-    boolean initRank();
+    boolean initRank(String examId);
 
     /**
      * 执行入围排名，可定时30s调用一次
@@ -25,7 +25,7 @@ public interface IRankService {
      * @param
      * @return
      */
-    boolean executeRank();
+    boolean executeRank(String examId);
 
     /**
      * 获取学校入围最后一名的学生信息
@@ -33,7 +33,7 @@ public interface IRankService {
      * @param schoolId
      * @return
      */
-    StudentRankVO getSchoolLastRank(String schoolId);
+    StudentRankVO getSchoolLastRank(String examId, String schoolId);
 
     /**
      * 获取学生在学校的名次
@@ -42,7 +42,7 @@ public interface IRankService {
      * @param userId
      * @return -1 未入围
      */
-    Integer mySchoolRank(String schoolId, String userId);
+    Integer mySchoolRank(String examId, String schoolId, String userId);
 
     /**
      * 获取学校入围学生清单
@@ -50,14 +50,32 @@ public interface IRankService {
      * @param schoolId
      * @return
      */
-    List<String> schoolStudentList(String schoolId);
+    List<String> schoolStudentList(String examId, String schoolId);
 
     /**
-     *  学生提交志愿
+     * 学生提交志愿
      *
      * @param userId
      * @param schoolList
      * @return
      */
-    void studentSubmitWill(String userId, List<String> schoolList);
+    void studentSubmitWill(String examId, String userId, List<String> schoolList);
+
+    /**
+     * 更新学生的分数
+     *
+     * @param userId
+     * @param score
+     * @return
+     */
+    void updateStudentScore(String examId, String userId, double score);
+
+    /**
+     * 更新学校招生人数
+     *
+     * @param schoolId
+     * @param personNum
+     * @return
+     */
+    void updateSchoolInfo(String examId, String schoolId, Integer personNum);
 }

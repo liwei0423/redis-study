@@ -25,38 +25,38 @@ public class RankServiceImpl implements IRankService {
     private RedisService redisService;
 
     @Override
-    public boolean initRank() {
+    public boolean initRank(String examId) {
         //todo 内存初始化学生分数
         return true;
     }
 
     @Override
-    public boolean executeRank() {
+    public boolean executeRank(String examId) {
         //初始化
-        init();
+        init(examId);
         //学生由高到底
-        Set<ZSetOperations.TypedTuple<Object>> result = redisService.reverseRangeWithScores(RedisConstant.KEY_ZSET_STUDENT_SCORE);
+        Set<ZSetOperations.TypedTuple<Object>> result = redisService.reverseRangeWithScores(RedisKeyBuilder.getKeyZsetStudentScore(examId));
         Iterator<ZSetOperations.TypedTuple<Object>> iterator = result.iterator();
         while (iterator.hasNext()) {
             ZSetOperations.TypedTuple<Object> typedTuple = iterator.next();
             String userId = String.valueOf(typedTuple.getValue());
             double totalScore = typedTuple.getScore();
             //学生志愿信息
-            String studentKey = RedisKeyBuilder.getKeyHashStudent(userId);
+            String studentKey = RedisKeyBuilder.getKeyHashStudent(examId, userId);
             Set<Object> hashKeys = redisService.hmHashKeys(studentKey);
             for (Object object : hashKeys) {
                 //志愿校
                 String schoolId = (String) object;
                 //学校信息key
-                String schoolKey = RedisKeyBuilder.getKeyHashSchool(schoolId);
+                String schoolKey = RedisKeyBuilder.getKeyHashSchool(examId, schoolId);
                 Object personNumObject = redisService.hmGet(schoolKey, RedisConstant.PROPS_PERSON_NUM);
                 //获取招生人数
                 Integer personNum = personNumObject == null ? 0 : (Integer) personNumObject;
                 //学校投档key
-                StudentRankVO studentRankVO = getSchoolLastRank(schoolId);
+                StudentRankVO studentRankVO = getSchoolLastRank(examId, schoolId);
                 if (studentRankVO.getRank() < personNum) {
                     //入围
-                    redisService.zAdd(RedisKeyBuilder.getKeyZsetSchoolRank(schoolId), userId, totalScore);
+                    redisService.zAdd(RedisKeyBuilder.getKeyZsetSchoolRank(examId, schoolId), userId, totalScore);
                     redisService.hmSet(studentKey, schoolId, true);
                     break;
                 }
@@ -71,8 +71,8 @@ public class RankServiceImpl implements IRankService {
      * @param
      * @return
      */
-    private void init() {
-        String pattern = RedisKeyBuilder.getKeyHashStudent("*");
+    private void init(String examId) {
+        String pattern = RedisKeyBuilder.getKeyHashStudent(examId, "*");
         Set<String> sets = redisService.keys(pattern);
         for (String studentKey : sets) {
             Set<Object> hashKeys = redisService.hmHashKeys(studentKey);
@@ -83,7 +83,7 @@ public class RankServiceImpl implements IRankService {
             }
         }
 
-        String schoolRankPattern = RedisKeyBuilder.getKeyZsetSchoolRank("*");
+        String schoolRankPattern = RedisKeyBuilder.getKeyZsetSchoolRank(examId, "*");
         Set<String> schoolRankSets = redisService.keys(schoolRankPattern);
         for (String key : schoolRankSets) {
             //TODO 批量删除
@@ -92,17 +92,17 @@ public class RankServiceImpl implements IRankService {
     }
 
     @Override
-    public StudentRankVO getSchoolLastRank(String schoolId) {
-        String schoolRankKey = RedisKeyBuilder.getKeyZsetSchoolRank(schoolId);
+    public StudentRankVO getSchoolLastRank(String examId, String schoolId) {
+        String schoolRankKey = RedisKeyBuilder.getKeyZsetSchoolRank(examId, schoolId);
         Set<ZSetOperations.TypedTuple<Object>> result = redisService.reverseRangeWithScores(schoolRankKey);
         Map<Object, Integer> rankMap = new LinkedHashMap<>();
         return ranking(result, rankMap);
     }
 
     @Override
-    public Integer mySchoolRank(String schoolId, String userId) {
+    public Integer mySchoolRank(String examId, String schoolId, String userId) {
         Integer rank = -1;
-        String schoolRankKey = RedisKeyBuilder.getKeyZsetSchoolRank(schoolId);
+        String schoolRankKey = RedisKeyBuilder.getKeyZsetSchoolRank(examId, schoolId);
         Set<ZSetOperations.TypedTuple<Object>> result = redisService.reverseRangeWithScores(schoolRankKey);
         Map<Object, Integer> rankMap = new LinkedHashMap<>();
         ranking(result, rankMap);
@@ -116,9 +116,9 @@ public class RankServiceImpl implements IRankService {
     }
 
     @Override
-    public List<String> schoolStudentList(String schoolId) {
+    public List<String> schoolStudentList(String examId, String schoolId) {
         List list = new ArrayList();
-        String schoolRankKey = RedisKeyBuilder.getKeyZsetSchoolRank(schoolId);
+        String schoolRankKey = RedisKeyBuilder.getKeyZsetSchoolRank(examId, schoolId);
         Set<ZSetOperations.TypedTuple<Object>> result = redisService.reverseRangeWithScores(schoolRankKey);
         Iterator<ZSetOperations.TypedTuple<Object>> iterator = result.iterator();
         while (iterator.hasNext()) {
@@ -131,11 +131,21 @@ public class RankServiceImpl implements IRankService {
     }
 
     @Override
-    public void studentSubmitWill(String userId, List<String> schoolList) {
-        String keyHashStudent = RedisKeyBuilder.getKeyHashStudent(userId);
+    public void studentSubmitWill(String examId, String userId, List<String> schoolList) {
+        String keyHashStudent = RedisKeyBuilder.getKeyHashStudent(examId, userId);
         for (String schoolId : schoolList) {
             redisService.hmSet(keyHashStudent, schoolId, false);
         }
+    }
+
+    @Override
+    public void updateStudentScore(String examId, String userId, double score) {
+
+    }
+
+    @Override
+    public void updateSchoolInfo(String examId, String schoolId, Integer personNum) {
+
     }
 
     /**

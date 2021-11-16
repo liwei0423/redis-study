@@ -10,45 +10,75 @@ import java.text.MessageFormat;
 public class RedisKeyBuilder {
 
     /**
-     * @desc: 学生志愿
+     * @desc: 学生分数明细
      */
-    private final static String KEY_HASH_STUDENT = "student:{0}";
-
+    public final static String KEY_ZSET_STUDENT_SCORE = "student_score:{0}";
     /**
-     * @desc: 学校信息
+     * @desc: 学校投档学生排名
      */
-    private final static String KEY_HASH_SCHOOL = "school:{0}";
+    public final static String KEY_ZSET_SCHOOL_STUDENT = "school_student:{0}";
 
     /**
      * @desc: 学校投档排名
      */
-    public final static String KEY_ZSET_SCHOOL_RANK = "school_rank:{0}";
+    public final static String KEY_ZSET_SCHOOL_RANK = "school_rank:{0}:{1}";
+
+    /**
+     * @desc: 学生志愿
+     */
+    public final static String KEY_HASH_STUDENT = "student:{0}:{1}";
+
+    /**
+     * @desc: 学校信息
+     */
+    public final static String KEY_HASH_SCHOOL = "school:{0}:{1}";
+
+    /**
+     * 获取所有学生分数明细key
+     *
+     * @param examId
+     */
+    public static String getKeyZsetStudentScore(String examId) {
+        return MessageFormat.format(KEY_ZSET_STUDENT_SCORE, examId);
+    }
+
+    /**
+     * 获取学校投档学生排名key
+     *
+     * @param examId
+     */
+    public static String getKeyZsetSchoolStudent(String examId) {
+        return MessageFormat.format(KEY_ZSET_SCHOOL_STUDENT, examId);
+    }
 
     /**
      * 获取学生志愿key
      *
+     * @param examId
      * @param userId
      */
-    public static String getKeyHashStudent(String userId) {
-        return MessageFormat.format(KEY_HASH_STUDENT, userId);
+    public static String getKeyHashStudent(String examId, String userId) {
+        return MessageFormat.format(KEY_HASH_STUDENT, examId, userId);
     }
 
     /**
      * 获取学校信息key
      *
+     * @param examId
      * @param schoolId
      */
-    public static String getKeyHashSchool(String schoolId) {
-        return MessageFormat.format(KEY_HASH_SCHOOL, schoolId);
+    public static String getKeyHashSchool(String examId, String schoolId) {
+        return MessageFormat.format(KEY_HASH_SCHOOL, examId, schoolId);
     }
 
     /**
      * 获取学校信息key
      *
+     * @param examId
      * @param schoolId
      */
-    public static String getKeyZsetSchoolRank(String schoolId) {
-        return MessageFormat.format(KEY_ZSET_SCHOOL_RANK, schoolId);
+    public static String getKeyZsetSchoolRank(String examId, String schoolId) {
+        return MessageFormat.format(KEY_ZSET_SCHOOL_RANK, examId, schoolId);
     }
 
 }
