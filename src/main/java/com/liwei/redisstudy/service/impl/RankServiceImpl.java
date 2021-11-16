@@ -140,7 +140,10 @@ public class RankServiceImpl implements IRankService {
 
     @Override
     public void updateStudentScore(String examId, String userId, double score) {
-
+        String studentScoreKey = RedisKeyBuilder.getKeyZsetStudentScore(examId);
+        Double currentScore = redisService.zGetScore(studentScoreKey, userId);
+        Double increment = score - currentScore;
+        redisService.incrementScore(studentScoreKey, userId, increment);
     }
 
     @Override

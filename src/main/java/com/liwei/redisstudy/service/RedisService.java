@@ -298,15 +298,15 @@ public class RedisService {
 
 
     /**
-     * 有序集合添加分数
+     * 有序集合对指定成员的分数加上增量 increment
      *
      * @param key
      * @param value
-     * @param score
+     * @param increment
      */
-    public void incrementScore(String key, Object value, double score) {
+    public void incrementScore(String key, Object value, double increment) {
         ZSetOperations<String, Object> zset = redisTemplate.opsForZSet();
-        zset.incrementScore(key, value, score);
+        zset.incrementScore(key, value, increment);
     }
 
 
