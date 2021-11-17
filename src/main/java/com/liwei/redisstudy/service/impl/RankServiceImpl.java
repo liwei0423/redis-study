@@ -29,7 +29,6 @@ public class RankServiceImpl implements IRankService {
         String studentScoreKey = RedisKeyBuilder.getKeyZsetStudentScore(examId);
         redisService.zBatchAdd(studentScoreKey, studentScoreList);
         for (String schoolId : schoolPersonNumList.keySet()) {
-            //todo 批量添加
             Integer personNum = schoolPersonNumList.get(schoolId);
             redisService.hmSet(RedisKeyBuilder.getKeyHashSchool(examId, schoolId), RedisConstant.PROPS_PERSON_NUM, personNum);
         }
@@ -44,22 +43,13 @@ public class RankServiceImpl implements IRankService {
         }
         String keyHashStudentPattern = RedisKeyBuilder.getKeyHashStudent(examId, "*");
         Set<String> studentSets = redisService.keys(keyHashStudentPattern);
-        for (String key : studentSets) {
-            //TODO 批量删除
-            redisService.remove(key);
-        }
+        redisService.removeBatch(studentSets);
         String keyHashSchoolPattern = RedisKeyBuilder.getKeyHashSchool(examId, "*");
         Set<String> schoolSet = redisService.keys(keyHashSchoolPattern);
-        for (String key : schoolSet) {
-            //TODO 批量删除
-            redisService.remove(key);
-        }
+        redisService.removeBatch(schoolSet);
         String keyZsetSchoolRankPattern = RedisKeyBuilder.getKeyZsetSchoolRank(examId, "*");
         Set<String> schoolRankSets = redisService.keys(keyZsetSchoolRankPattern);
-        for (String key : schoolRankSets) {
-            //TODO 批量删除
-            redisService.remove(key);
-        }
+        redisService.removeBatch(schoolRankSets);
         return true;
     }
 
@@ -119,10 +109,7 @@ public class RankServiceImpl implements IRankService {
 
         String schoolRankPattern = RedisKeyBuilder.getKeyZsetSchoolRank(examId, "*");
         Set<String> schoolRankSets = redisService.keys(schoolRankPattern);
-        for (String key : schoolRankSets) {
-            //TODO 批量删除
-            redisService.remove(key);
-        }
+        redisService.removeBatch(schoolRankSets);
     }
 
     @Override

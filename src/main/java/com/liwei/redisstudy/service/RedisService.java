@@ -3,12 +3,10 @@ package com.liwei.redisstudy.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -119,6 +117,17 @@ public class RedisService {
     public void remove(final String key) {
         if (exists(key)) {
             redisTemplate.delete(key);
+        }
+    }
+
+    /**
+     * 批量删除对应的keys
+     *
+     * @param keys
+     */
+    public void removeBatch(Collection keys) {
+        if (!CollectionUtils.isEmpty(keys)) {
+            redisTemplate.delete(keys);
         }
     }
 

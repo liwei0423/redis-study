@@ -7,9 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @description:
@@ -48,10 +46,7 @@ public class StudentRankTest {
     public void studentVolunteer() {
         String pattern = RedisKeyBuilder.getKeyHashStudent(examId, "*");
         Set<String> sets = redisService.keys(pattern);
-        for (String key : sets) {
-            //TODO 批量删除
-            redisService.remove(key);
-        }
+        redisService.removeBatch(sets);
 
         redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "1"), "11", false);
         redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "1"), "22", false);
@@ -85,10 +80,7 @@ public class StudentRankTest {
     public void schoolRecruit() {
         String pattern = RedisKeyBuilder.getKeyHashSchool(examId, "*");
         Set<String> sets = redisService.keys(pattern);
-        for (String key : sets) {
-            //TODO 批量删除
-            redisService.remove(key);
-        }
+        redisService.removeBatch(sets);
 
         redisService.hmSet(RedisKeyBuilder.getKeyHashSchool(examId, "11"), "personNum", 3);
         redisService.hmSet(RedisKeyBuilder.getKeyHashSchool(examId, "22"), "personNum", 3);
@@ -102,6 +94,14 @@ public class StudentRankTest {
         map.put("1", 80.0);
         map.put("2", 81.0);
         redisService.zBatchAdd(studentScoreKey, map);
+    }
+
+    @Test
+    public void testRemoveKeyBatch() {
+        Set<String> keyList = new HashSet<>();
+        keyList.add("key1");
+        keyList.add("key2");
+        redisService.removeBatch(keyList);
     }
 
     @Test
