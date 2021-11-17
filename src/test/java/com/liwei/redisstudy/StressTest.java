@@ -68,7 +68,7 @@ public class StressTest {
     }
 
     @Test
-    public void studentVolunteer() throws InterruptedException {
+    public void studentVolunteer() {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         String keyHashStudent = RedisKeyBuilder.getKeyHashStudent(examId);
