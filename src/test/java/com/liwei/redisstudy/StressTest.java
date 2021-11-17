@@ -3,12 +3,16 @@ package com.liwei.redisstudy;
 import com.liwei.redisstudy.constant.RedisKeyBuilder;
 import com.liwei.redisstudy.service.IRankService;
 import com.liwei.redisstudy.service.RedisService;
+import com.liwei.redisstudy.task.StudentVolunteerTask;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.StopWatch;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @description:
@@ -33,11 +37,11 @@ public class StressTest {
 
     private final static Integer studentWillNum = 5;
 
-    private List<String> schoolList;
+    private static List<String> schoolList = new ArrayList<>();
 
     static {
-        for(int i=0;i<schoolNum;i++){
-
+        for (int i = 0; i < schoolNum; i++) {
+            schoolList.add(String.valueOf(i + 1));
         }
     }
 
@@ -62,42 +66,32 @@ public class StressTest {
     }
 
     @Test
-    public void studentVolunteer() {
+    public void studentVolunteer() throws InterruptedException {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         String pattern = RedisKeyBuilder.getKeyHashStudent(examId, "*");
         Set<String> sets = redisService.keys(pattern);
         redisService.removeBatch(sets);
 
+        ExecutorService executorService = Executors.newCachedThreadPool();
         for (int i = 0; i < studentNum; i++) {
             String userId = String.valueOf(i + 1);
-
+            List<String> willList = listRandom(schoolList, studentWillNum);
+            Map<Object, Object> map = new LinkedHashMap<>();
+            for (String schoolId : willList) {
+                map.put(schoolId, false);
+            }
+            executorService.execute(new StudentVolunteerTask(redisService, examId, userId, map));
+//            redisService.hmBatchSet(RedisKeyBuilder.getKeyHashStudent(examId, userId), map);
         }
+        executorService.awaitTermination(500, TimeUnit.SECONDS);
+        stopWatch.stop();
+        System.out.println(stopWatch.getLastTaskTimeMillis());
+    }
 
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "1"), "11", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "1"), "22", false);
-
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "2"), "22", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "2"), "33", false);
-
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "3"), "33", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "3"), "22", false);
-
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "4"), "11", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "4"), "22", false);
-
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "5"), "11", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "5"), "33", false);
-
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "6"), "22", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "6"), "33", false);
-
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "7"), "22", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "7"), "33", false);
-
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "8"), "22", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "8"), "11", false);
-
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "9"), "22", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "9"), "33", false);
+    private static List<String> listRandom(List<String> list, Integer num) {
+        Collections.shuffle(list);
+        return list.subList(0, num);
     }
 
 
