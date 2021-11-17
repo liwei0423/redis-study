@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.liwei.redisstudy.constant.RedisKeyBuilder;
 import com.liwei.redisstudy.service.IRankService;
 import com.liwei.redisstudy.service.RedisService;
+import com.liwei.redisstudy.vo.SchoolInfoVO;
+import com.liwei.redisstudy.vo.StudentWillVO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -78,13 +80,46 @@ public class StressTest {
         for (int i = 0; i < studentNum; i++) {
             String userId = String.valueOf(i + 1);
             List<String> willList = listRandom(schoolList, studentWillNum);
-            map.put(userId, JSON.toJSONString(willList));
+            map.put(userId, studentWillJsonString(willList));
         }
         redisService.hmBatchSet(keyHashStudent, map);
         stopWatch.stop();
         System.out.println(stopWatch.getLastTaskTimeMillis());
     }
 
+    private static String studentWillJsonString(List<String> schoolIds) {
+        List<StudentWillVO> list = new ArrayList<>();
+        for (String schoolId : schoolIds) {
+            list.add(new StudentWillVO(schoolId, false));
+        }
+        return JSON.toJSONString(list);
+    }
+
+    @Test
+    public void schoolRecruit() {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        String keyHashSchool = RedisKeyBuilder.getKeyHashSchool(examId);
+        redisService.remove(keyHashSchool);
+        Map<Object, Object> map = new HashMap<>();
+        for (int i = 0; i < schoolNum; i++) {
+            String schoolId = String.valueOf(i + 1);
+            map.put(schoolId, JSON.toJSONString(new SchoolInfoVO(1000)));
+        }
+        redisService.hmBatchSet(keyHashSchool, map);
+        stopWatch.stop();
+        System.out.println(stopWatch.getLastTaskTimeMillis());
+    }
+
+    @Test
+    public void executeRank() {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        boolean flag = rankService.executeRank(examId);
+        System.out.println("return=" + flag);
+        stopWatch.stop();
+        System.out.println(stopWatch.getLastTaskTimeMillis());
+    }
 
 }
 

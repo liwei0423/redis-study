@@ -59,7 +59,7 @@ public class StudentRankTest {
         redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId), "9", studentWillJsonString("22", "33"));
     }
 
-    private String studentWillJsonString(String... schoolIds) {
+    private static String studentWillJsonString(String... schoolIds) {
         List<StudentWillVO> list = new ArrayList<>();
         for (String schoolId : schoolIds) {
             list.add(new StudentWillVO(schoolId, false));
@@ -72,11 +72,12 @@ public class StudentRankTest {
         String keyHashSchool = RedisKeyBuilder.getKeyHashSchool(examId);
         redisService.remove(keyHashSchool);
 
+        System.out.println(new SchoolInfoVO(3));
+
         redisService.hmSet(RedisKeyBuilder.getKeyHashSchool(examId), "11", JSON.toJSONString(new SchoolInfoVO(3)));
         redisService.hmSet(RedisKeyBuilder.getKeyHashSchool(examId), "22", JSON.toJSONString(new SchoolInfoVO(3)));
         redisService.hmSet(RedisKeyBuilder.getKeyHashSchool(examId), "33", JSON.toJSONString(new SchoolInfoVO(3)));
     }
-
 
     @Test
     public void testZsetBatchAdd() {

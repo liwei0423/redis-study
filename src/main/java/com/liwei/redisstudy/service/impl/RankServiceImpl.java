@@ -76,7 +76,14 @@ public class RankServiceImpl implements IRankService {
             double totalScore = typedTuple.getScore();
             //学生志愿信息
             String studentWillString = (String) redisService.hmGet(studentKey, userId);
-            List<StudentWillVO> studentWillVOS = JSONArray.parseArray(studentWillString, StudentWillVO.class);
+            List<StudentWillVO> studentWillVOS;
+            try {
+//                studentWillString = studentWillString.replace("\\", "");
+                studentWillVOS = JSON.parseArray(studentWillString, StudentWillVO.class);
+            } catch (Exception e) {
+                System.out.println("studentWillString=" + studentWillString);
+                throw e;
+            }
             for (StudentWillVO studentWillVO : studentWillVOS) {
                 //志愿校
                 String schoolId = studentWillVO.getSchoolId();

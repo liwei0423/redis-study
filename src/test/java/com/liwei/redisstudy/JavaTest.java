@@ -1,5 +1,6 @@
 package com.liwei.redisstudy;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.liwei.redisstudy.vo.StudentWillVO;
@@ -36,7 +37,7 @@ public class JavaTest {
             list.add(new StudentWillVO("22", false));
             String jsonString = JSONObject.toJSONString(list);
 //            System.out.println(jsonString);
-            List<StudentWillVO> list2 = JSONArray.parseArray(jsonString, StudentWillVO.class);
+            List<StudentWillVO> list2 = JSON.parseArray(jsonString, StudentWillVO.class);
             for (StudentWillVO item : list2) {
 //                System.out.println(item);
             }
@@ -44,4 +45,12 @@ public class JavaTest {
         stopWatch.stop();
         System.out.println(stopWatch.getLastTaskTimeMillis());
     }
+
+
+    @Test
+    public void testJsonArray(){
+        String studentWillString="[{\"schoolId\":\"53\",\"success\":false},{\"schoolId\":\"24\",\"success\":false},{\"schoolId\":\"6\",\"success\":false},{\"schoolId\":\"77\",\"success\":false},{\"schoolId\":\"43\",\"success\":false}]";
+        List<StudentWillVO> list = JSON.parseArray(studentWillString,StudentWillVO.class);
+    }
+
 }

@@ -23,7 +23,7 @@ public interface IRankService {
     boolean initMemory(String examId, Map<String, Double> studentScoreList, Map<String, Integer> schoolPersonNumList);
 
     /**
-     *  清理内存，投档完成可调用释放资源
+     *  清理内存，投档完成可调用释放redis内存资源
      *
      * @param examId
      * @return
