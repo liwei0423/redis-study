@@ -1,18 +1,15 @@
 package com.liwei.redisstudy;
 
+import com.alibaba.fastjson.JSON;
 import com.liwei.redisstudy.constant.RedisKeyBuilder;
 import com.liwei.redisstudy.service.IRankService;
 import com.liwei.redisstudy.service.RedisService;
-import com.liwei.redisstudy.task.StudentVolunteerTask;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.StopWatch;
 
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @description:
@@ -65,33 +62,27 @@ public class StressTest {
         System.out.println(stopWatch.getLastTaskTimeMillis());
     }
 
+    private static List<String> listRandom(List<String> list, Integer num) {
+        Collections.shuffle(list);
+        return list.subList(0, num);
+    }
+
     @Test
     public void studentVolunteer() throws InterruptedException {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        String pattern = RedisKeyBuilder.getKeyHashStudent(examId, "*");
-        Set<String> sets = redisService.keys(pattern);
-        redisService.removeBatch(sets);
+        String keyHashStudent = RedisKeyBuilder.getKeyHashStudent(examId);
+        redisService.remove(keyHashStudent);
 
-        ExecutorService executorService = Executors.newCachedThreadPool();
+        Map<Object, Object> map = new HashMap<>();
         for (int i = 0; i < studentNum; i++) {
             String userId = String.valueOf(i + 1);
             List<String> willList = listRandom(schoolList, studentWillNum);
-            Map<Object, Object> map = new LinkedHashMap<>();
-            for (String schoolId : willList) {
-                map.put(schoolId, false);
-            }
-            executorService.execute(new StudentVolunteerTask(redisService, examId, userId, map));
-//            redisService.hmBatchSet(RedisKeyBuilder.getKeyHashStudent(examId, userId), map);
+            map.put(userId, JSON.toJSONString(willList));
         }
-        executorService.awaitTermination(500, TimeUnit.SECONDS);
+        redisService.hmBatchSet(keyHashStudent, map);
         stopWatch.stop();
         System.out.println(stopWatch.getLastTaskTimeMillis());
-    }
-
-    private static List<String> listRandom(List<String> list, Integer num) {
-        Collections.shuffle(list);
-        return list.subList(0, num);
     }
 
 

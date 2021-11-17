@@ -1,8 +1,11 @@
 package com.liwei.redisstudy;
 
+import com.alibaba.fastjson.JSON;
 import com.liwei.redisstudy.constant.RedisKeyBuilder;
 import com.liwei.redisstudy.service.IRankService;
 import com.liwei.redisstudy.service.RedisService;
+import com.liwei.redisstudy.vo.SchoolInfoVO;
+import com.liwei.redisstudy.vo.StudentWillVO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,9 +31,7 @@ public class StudentRankTest {
     public void studentScore() {
 
         String studentScoreKey = RedisKeyBuilder.getKeyZsetStudentScore(examId);
-        if (redisService.exists(studentScoreKey)) {
-            redisService.remove(studentScoreKey);
-        }
+        redisService.remove(studentScoreKey);
         redisService.zAdd(studentScoreKey, "1", 80f);
         redisService.zAdd(studentScoreKey, "2", 82f);
         redisService.zAdd(studentScoreKey, "3", 81f);
@@ -44,48 +45,38 @@ public class StudentRankTest {
 
     @Test
     public void studentVolunteer() {
-        String pattern = RedisKeyBuilder.getKeyHashStudent(examId, "*");
-        Set<String> sets = redisService.keys(pattern);
-        redisService.removeBatch(sets);
+        String keyHashStudent = RedisKeyBuilder.getKeyHashStudent(examId);
+        redisService.remove(keyHashStudent);
 
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "1"), "11", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "1"), "22", false);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId), "1", studentWillJsonString("11", "22"));
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId), "2", studentWillJsonString("22", "33"));
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId), "3", studentWillJsonString("33", "22"));
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId), "4", studentWillJsonString("11", "22"));
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId), "5", studentWillJsonString("11", "33"));
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId), "6", studentWillJsonString("22", "33"));
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId), "7", studentWillJsonString("22", "33"));
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId), "8", studentWillJsonString("22", "11"));
+        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId), "9", studentWillJsonString("22", "33"));
+    }
 
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "2"), "22", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "2"), "33", false);
-
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "3"), "33", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "3"), "22", false);
-
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "4"), "11", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "4"), "22", false);
-
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "5"), "11", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "5"), "33", false);
-
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "6"), "22", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "6"), "33", false);
-
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "7"), "22", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "7"), "33", false);
-
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "8"), "22", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "8"), "11", false);
-
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "9"), "22", false);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashStudent(examId, "9"), "33", false);
+    private String studentWillJsonString(String... schoolIds) {
+        List<StudentWillVO> list = new ArrayList<>();
+        for (String schoolId : schoolIds) {
+            list.add(new StudentWillVO(schoolId, false));
+        }
+        return JSON.toJSONString(list);
     }
 
     @Test
     public void schoolRecruit() {
-        String pattern = RedisKeyBuilder.getKeyHashSchool(examId, "*");
-        Set<String> sets = redisService.keys(pattern);
-        redisService.removeBatch(sets);
+        String keyHashSchool = RedisKeyBuilder.getKeyHashSchool(examId);
+        redisService.remove(keyHashSchool);
 
-        redisService.hmSet(RedisKeyBuilder.getKeyHashSchool(examId, "11"), "personNum", 3);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashSchool(examId, "22"), "personNum", 3);
-        redisService.hmSet(RedisKeyBuilder.getKeyHashSchool(examId, "33"), "personNum", 3);
+        redisService.hmSet(RedisKeyBuilder.getKeyHashSchool(examId), "11", JSON.toJSONString(new SchoolInfoVO(3)));
+        redisService.hmSet(RedisKeyBuilder.getKeyHashSchool(examId), "22", JSON.toJSONString(new SchoolInfoVO(3)));
+        redisService.hmSet(RedisKeyBuilder.getKeyHashSchool(examId), "33", JSON.toJSONString(new SchoolInfoVO(3)));
     }
+
 
     @Test
     public void testZsetBatchAdd() {

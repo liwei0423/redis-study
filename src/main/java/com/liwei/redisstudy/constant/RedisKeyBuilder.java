@@ -26,12 +26,17 @@ public class RedisKeyBuilder {
     /**
      * @desc: 学生志愿
      */
-    public final static String KEY_HASH_STUDENT = "student:{0}:{1}";
+    public final static String KEY_HASH_STUDENT = "student:{0}";
+
+    /**
+     * @desc: 学生志愿结果
+     */
+    public final static String KEY_HASH_STUDENT_RESULT = "student:result:{0}";
 
     /**
      * @desc: 学校信息
      */
-    public final static String KEY_HASH_SCHOOL = "school:{0}:{1}";
+    public final static String KEY_HASH_SCHOOL = "school:{0}";
 
     /**
      * 获取所有学生分数明细key
@@ -55,20 +60,27 @@ public class RedisKeyBuilder {
      * 获取学生志愿key
      *
      * @param examId
-     * @param userId
      */
-    public static String getKeyHashStudent(String examId, String userId) {
-        return MessageFormat.format(KEY_HASH_STUDENT, examId, userId);
+    public static String getKeyHashStudent(String examId) {
+        return MessageFormat.format(KEY_HASH_STUDENT, examId);
+    }
+
+    /**
+     * 获取学生志愿结果key
+     *
+     * @param examId
+     */
+    public static String getKeyHashStudentResult(String examId) {
+        return MessageFormat.format(KEY_HASH_STUDENT_RESULT, examId);
     }
 
     /**
      * 获取学校信息key
      *
      * @param examId
-     * @param schoolId
      */
-    public static String getKeyHashSchool(String examId, String schoolId) {
-        return MessageFormat.format(KEY_HASH_SCHOOL, examId, schoolId);
+    public static String getKeyHashSchool(String examId) {
+        return MessageFormat.format(KEY_HASH_SCHOOL, examId);
     }
 
     /**
