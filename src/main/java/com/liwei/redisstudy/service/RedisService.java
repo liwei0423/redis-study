@@ -20,6 +20,10 @@ public class RedisService {
     @Autowired
     private RedisTemplate redisTemplate;
 
+    public RedisTemplate getRedisTemplate() {
+        return redisTemplate;
+    }
+
     /**
      * 写入缓存
      *

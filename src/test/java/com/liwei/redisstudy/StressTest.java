@@ -9,6 +9,8 @@ import com.liwei.redisstudy.vo.StudentWillVO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.StopWatch;
 
 import java.util.*;
@@ -117,6 +119,22 @@ public class StressTest {
         stopWatch.start();
         boolean flag = rankService.executeRank(examId);
         System.out.println("return=" + flag);
+        stopWatch.stop();
+        System.out.println(stopWatch.getLastTaskTimeMillis());
+    }
+
+    @Test
+    public void testList() {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        RedisTemplate redisTemplate = redisService.getRedisTemplate();
+        redisTemplate.execute((RedisCallback) connection -> {
+            connection.openPipeline();
+            for (int i = 0; i < 100000; i++) {
+                connection.lPush("111".getBytes(), String.valueOf(i + 1).getBytes());
+            }
+            return null;
+        });
         stopWatch.stop();
         System.out.println(stopWatch.getLastTaskTimeMillis());
     }

@@ -1,7 +1,6 @@
 package com.liwei.redisstudy.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.liwei.redisstudy.constant.RedisKeyBuilder;
 import com.liwei.redisstudy.service.IRankService;
@@ -78,7 +77,6 @@ public class RankServiceImpl implements IRankService {
             String studentWillString = (String) redisService.hmGet(studentKey, userId);
             List<StudentWillVO> studentWillVOS;
             try {
-//                studentWillString = studentWillString.replace("\\", "");
                 studentWillVOS = JSON.parseArray(studentWillString, StudentWillVO.class);
             } catch (Exception e) {
                 System.out.println("studentWillString=" + studentWillString);
