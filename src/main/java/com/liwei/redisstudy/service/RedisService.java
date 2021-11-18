@@ -228,6 +228,17 @@ public class RedisService {
     }
 
     /**
+     * 列表批量添加
+     *
+     * @param k
+     * @param values
+     */
+    public void lPushBatch(String k, List<Object> values) {
+        ListOperations<String, Object> list = redisTemplate.opsForList();
+        list.rightPushAll(k, values);
+    }
+
+    /**
      * 列表获取
      *
      * @param k

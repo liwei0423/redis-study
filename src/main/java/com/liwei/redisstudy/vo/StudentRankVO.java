@@ -18,5 +18,9 @@ public class StudentRankVO {
 
     private String userId;
 
+    private Double score;
+
     private Integer rank;
+
+    private String schoolId;
 }

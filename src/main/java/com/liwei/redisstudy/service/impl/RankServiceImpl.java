@@ -66,6 +66,8 @@ public class RankServiceImpl implements IRankService {
         init(examId);
         String studentResultKey = RedisKeyBuilder.getKeyHashStudentResult(examId);
         String studentKey = RedisKeyBuilder.getKeyHashStudent(examId);
+        Map<String, List<Object>> schoolRankMap = new HashMap<>(10);
+        Map<Object, Object> studentRankMap = new HashMap<>(1000);
         //学生由高到底
         Set<ZSetOperations.TypedTuple<Object>> result = redisService.reverseRangeWithScores(RedisKeyBuilder.getKeyZsetStudentScore(examId));
         Iterator<ZSetOperations.TypedTuple<Object>> iterator = result.iterator();
@@ -75,13 +77,7 @@ public class RankServiceImpl implements IRankService {
             double totalScore = typedTuple.getScore();
             //学生志愿信息
             String studentWillString = (String) redisService.hmGet(studentKey, userId);
-            List<StudentWillVO> studentWillVOS;
-            try {
-                studentWillVOS = JSON.parseArray(studentWillString, StudentWillVO.class);
-            } catch (Exception e) {
-                System.out.println("studentWillString=" + studentWillString);
-                throw e;
-            }
+            List<StudentWillVO> studentWillVOS = JSON.parseArray(studentWillString, StudentWillVO.class);
             for (StudentWillVO studentWillVO : studentWillVOS) {
                 //志愿校
                 String schoolId = studentWillVO.getSchoolId();
@@ -92,16 +88,52 @@ public class RankServiceImpl implements IRankService {
                 //获取招生人数
                 Integer personNum = schoolInfoVO.getPersonNum();
                 //学校投档key
-                StudentRankVO studentRankVO = getSchoolLastRank(examId, schoolId);
-                if (studentRankVO.getRank() < personNum) {
+                String schoolRankMapKey = RedisKeyBuilder.getKeyZsetSchoolRank(examId, schoolId);
+                StudentRankVO lastStudentRankVO = getSchoolLastStudent(schoolRankMapKey, schoolRankMap);
+                if (lastStudentRankVO == null || lastStudentRankVO.getRank() < personNum) {
                     //入围
-                    redisService.zAdd(RedisKeyBuilder.getKeyZsetSchoolRank(examId, schoolId), userId, totalScore);
-                    redisService.hmSet(studentResultKey, userId, schoolId);
+//                    redisService.zAdd(RedisKeyBuilder.getKeyZsetSchoolRank(examId, schoolId), userId, totalScore);
+//                    redisService.hmSet(studentResultKey, userId, schoolId);
+                    List<Object> list;
+                    if (schoolRankMap.containsKey(schoolRankMapKey)) {
+                        list = schoolRankMap.get(schoolRankMapKey);
+                    } else {
+                        list = new ArrayList();
+                    }
+                    Integer rank = lastStudentRankVO == null ? 1 : (totalScore < lastStudentRankVO.getScore() ? lastStudentRankVO.getRank() + 1 : lastStudentRankVO.getRank());
+                    StudentRankVO currentStudentRankVO = new StudentRankVO(userId, totalScore, rank, schoolId);
+                    list.add(JSON.toJSONString(currentStudentRankVO));
+                    schoolRankMap.put(schoolRankMapKey, list);
+                    studentRankMap.put(userId, JSON.toJSONString(currentStudentRankVO));
                     break;
                 }
             }
         }
+        //批量写入redis
+        for (String key : schoolRankMap.keySet()) {
+            redisService.lPushBatch(key, schoolRankMap.get(key));
+        }
+        redisService.hmBatchSet(studentResultKey, studentRankMap);
         return true;
+    }
+
+    /**
+     * 从List集合获取学校最后一名的学生信息
+     *
+     * @param schoolRankMapKey
+     * @param schoolRankMap
+     * @return
+     */
+    private StudentRankVO getSchoolLastStudent(String schoolRankMapKey, Map<String, List<Object>> schoolRankMap) {
+        if (schoolRankMap.containsKey(schoolRankMapKey)) {
+            List<Object> list = schoolRankMap.get(schoolRankMapKey);
+            if (list.size() > 0) {
+                String studentRankStr = (String) list.get(list.size() - 1);
+                StudentRankVO studentRankVO = JSONObject.parseObject(studentRankStr, StudentRankVO.class);
+                return studentRankVO;
+            }
+        }
+        return null;
     }
 
     /**
@@ -202,7 +234,7 @@ public class RankServiceImpl implements IRankService {
             }
             lastScore = typedTuple.getScore();
         }
-        return new StudentRankVO(userId, rank);
+        return new StudentRankVO(userId, null, rank, null);
     }
 
 
