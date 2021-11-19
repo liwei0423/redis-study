@@ -106,7 +106,7 @@ public class StressTest {
         Map<Object, Object> map = new HashMap<>();
         for (int i = 0; i < schoolNum; i++) {
             String schoolId = String.valueOf(i + 1);
-            map.put(schoolId, JSON.toJSONString(new SchoolInfoVO(1000)));
+            map.put(schoolId, JSON.toJSONString(new SchoolInfoVO(schoolStudentNum)));
         }
         redisService.hmBatchSet(keyHashSchool, map);
         stopWatch.stop();
@@ -117,6 +117,9 @@ public class StressTest {
     public void executeRank() {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
+        studentScore();
+        studentVolunteer();
+        schoolRecruit();
         boolean flag = rankService.executeRank(examId);
         System.out.println("return=" + flag);
         stopWatch.stop();
@@ -135,6 +138,28 @@ public class StressTest {
             }
             return null;
         });
+        stopWatch.stop();
+        System.out.println(stopWatch.getLastTaskTimeMillis());
+    }
+
+    @Test
+    public void clear() {
+        rankService.clearMemory(examId);
+    }
+
+    @Test
+    public void testQueryKey(){
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        String studentKey = RedisKeyBuilder.getKeyHashStudent(examId);
+        for(int i=0;i<10000;i++){
+            try {
+                Object studentWillString = redisService.hmGet(studentKey, (i+1));
+            }catch (Exception e){
+                System.out.println("###="+(i+1));
+                e.printStackTrace();
+            }
+        }
         stopWatch.stop();
         System.out.println(stopWatch.getLastTaskTimeMillis());
     }

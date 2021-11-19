@@ -205,6 +205,18 @@ public class RedisService {
     }
 
     /**
+     * 获取在哈希表中指定 key 的所有字段和值
+     *
+     * @param key
+     * @return
+     */
+    public Map<Object, Object> hmGetTall(String key) {
+        HashOperations<String, Object, Object> hash = redisTemplate.opsForHash();
+        Map<Object, Object> map = hash.entries(key);
+        return map;
+    }
+
+    /**
      * 哈希获取hashKeys
      *
      * @param key
@@ -214,7 +226,6 @@ public class RedisService {
         HashOperations<String, Object, Object> hash = redisTemplate.opsForHash();
         return hash.keys(key);
     }
-
 
     /**
      * 列表添加

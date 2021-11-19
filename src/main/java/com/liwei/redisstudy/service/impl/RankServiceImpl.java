@@ -66,8 +66,11 @@ public class RankServiceImpl implements IRankService {
         init(examId);
         String studentResultKey = RedisKeyBuilder.getKeyHashStudentResult(examId);
         String studentKey = RedisKeyBuilder.getKeyHashStudent(examId);
+        String keyHashSchool = RedisKeyBuilder.getKeyHashSchool(examId);
         Map<String, List<Object>> schoolRankMap = new HashMap<>(10);
         Map<Object, Object> studentRankMap = new HashMap<>(1000);
+        Map<Object, Object> studentWillMap = redisService.hmGetTall(studentKey);
+        Map<Object, Object> schoolInfoMap = redisService.hmGetTall(keyHashSchool);
         //学生由高到底
         Set<ZSetOperations.TypedTuple<Object>> result = redisService.reverseRangeWithScores(RedisKeyBuilder.getKeyZsetStudentScore(examId));
         Iterator<ZSetOperations.TypedTuple<Object>> iterator = result.iterator();
@@ -76,15 +79,11 @@ public class RankServiceImpl implements IRankService {
             String userId = String.valueOf(typedTuple.getValue());
             double totalScore = typedTuple.getScore();
             //学生志愿信息
-            String studentWillString = (String) redisService.hmGet(studentKey, userId);
-            List<StudentWillVO> studentWillVOS = JSON.parseArray(studentWillString, StudentWillVO.class);
+            List<StudentWillVO> studentWillVOS = JSONObject.parseArray((String) studentWillMap.get(userId), StudentWillVO.class);
             for (StudentWillVO studentWillVO : studentWillVOS) {
                 //志愿校
                 String schoolId = studentWillVO.getSchoolId();
-                //学校信息key
-                String keyHashSchool = RedisKeyBuilder.getKeyHashSchool(examId);
-                String schoolInfoStr = (String) redisService.hmGet(keyHashSchool, schoolId);
-                SchoolInfoVO schoolInfoVO = JSONObject.parseObject(schoolInfoStr, SchoolInfoVO.class);
+                SchoolInfoVO schoolInfoVO = JSON.parseObject((String) schoolInfoMap.get(schoolId), SchoolInfoVO.class);
                 //获取招生人数
                 Integer personNum = schoolInfoVO.getPersonNum();
                 //学校投档key
