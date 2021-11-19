@@ -250,6 +250,16 @@ public class RedisService {
     }
 
     /**
+     * 获取列表最后一个元素
+     *
+     * @param k
+     */
+    public Object lLast(String k) {
+        ListOperations<String, Object> list = redisTemplate.opsForList();
+        return list.index(k, list.size(k) - 1);
+    }
+
+    /**
      * 列表获取
      *
      * @param k
@@ -260,6 +270,17 @@ public class RedisService {
     public List<Object> lRange(String k, long l, long l1) {
         ListOperations<String, Object> list = redisTemplate.opsForList();
         return list.range(k, l, l1);
+    }
+
+    /**
+     * 获取列表所有元素
+     *
+     * @param k
+     * @return
+     */
+    public List<Object> lList(String k) {
+        ListOperations<String, Object> list = redisTemplate.opsForList();
+        return list.range(k, 0, (list.size(k) - 1));
     }
 
     /**

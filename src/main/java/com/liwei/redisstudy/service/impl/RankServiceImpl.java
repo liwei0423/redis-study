@@ -29,9 +29,10 @@ public class RankServiceImpl implements IRankService {
 
     @Override
     public boolean initMemory(String examId, Map<String, Double> studentScoreList, Map<String, Integer> schoolPersonNumList) {
+        //装载学生分数
         String studentScoreKey = RedisKeyBuilder.getKeyZsetStudentScore(examId);
         redisService.zBatchAdd(studentScoreKey, studentScoreList);
-
+        //装载学校招生
         Map<Object, Object> map = new HashMap<>();
         for (String schoolId : schoolPersonNumList.keySet()) {
             Integer personNum = schoolPersonNumList.get(schoolId);
@@ -44,17 +45,22 @@ public class RankServiceImpl implements IRankService {
 
     @Override
     public boolean clearMemory(String examId) {
+        //清理学生分数
         String studentScoreKey = RedisKeyBuilder.getKeyZsetStudentScore(examId);
         if (redisService.exists(studentScoreKey)) {
             redisService.remove(studentScoreKey);
         }
+        //清理学生志愿
         String keyHashStudent = RedisKeyBuilder.getKeyHashStudent(examId);
         redisService.remove(keyHashStudent);
+        //清理学校招生
         String keyHashSchool = RedisKeyBuilder.getKeyHashSchool(examId);
         redisService.remove(keyHashSchool);
+        //清理学校入围排名
         String keyZsetSchoolRankPattern = RedisKeyBuilder.getKeyZsetSchoolRank(examId, "*");
         Set<String> schoolRankSets = redisService.keys(keyZsetSchoolRankPattern);
         redisService.removeBatch(schoolRankSets);
+        //清理学生入围
         String keyHashStudentResult = RedisKeyBuilder.getKeyHashStudentResult(examId);
         redisService.remove(keyHashStudentResult);
         return true;
@@ -153,40 +159,28 @@ public class RankServiceImpl implements IRankService {
     @Override
     public StudentRankVO getSchoolLastRank(String examId, String schoolId) {
         String schoolRankKey = RedisKeyBuilder.getKeyZsetSchoolRank(examId, schoolId);
-        Set<ZSetOperations.TypedTuple<Object>> result = redisService.reverseRangeWithScores(schoolRankKey);
-        Map<Object, Integer> rankMap = new LinkedHashMap<>();
-        return ranking(result, rankMap);
+        Object schoolRankObject = redisService.lLast(schoolRankKey);
+        StudentRankVO studentRankVO = JSON.parseObject((String) schoolRankObject, StudentRankVO.class);
+        return studentRankVO;
     }
 
     @Override
-    public Integer mySchoolRank(String examId, String schoolId, String userId) {
-        Integer rank = -1;
-        String schoolRankKey = RedisKeyBuilder.getKeyZsetSchoolRank(examId, schoolId);
-        Set<ZSetOperations.TypedTuple<Object>> result = redisService.reverseRangeWithScores(schoolRankKey);
-        Map<Object, Integer> rankMap = new LinkedHashMap<>();
-        ranking(result, rankMap);
-        for (Object item : rankMap.keySet()) {
-            if (Objects.equals(item, userId)) {
-                rank = rankMap.get(item);
-                break;
-            }
-        }
-        return rank;
+    public StudentRankVO mySchoolRank(String examId, String schoolId, String userId) {
+        String studentResultKey = RedisKeyBuilder.getKeyHashStudentResult(examId);
+        Object studentResultObject = redisService.hmGet(studentResultKey, userId);
+        StudentRankVO studentRankVO = JSON.parseObject((String) studentResultObject, StudentRankVO.class);
+        return studentRankVO;
     }
 
     @Override
-    public List<String> schoolStudentList(String examId, String schoolId) {
-        List list = new ArrayList();
+    public List<StudentRankVO> schoolStudentList(String examId, String schoolId) {
         String schoolRankKey = RedisKeyBuilder.getKeyZsetSchoolRank(examId, schoolId);
-        Set<ZSetOperations.TypedTuple<Object>> result = redisService.reverseRangeWithScores(schoolRankKey);
-        Iterator<ZSetOperations.TypedTuple<Object>> iterator = result.iterator();
-        while (iterator.hasNext()) {
-            ZSetOperations.TypedTuple<Object> typedTuple = iterator.next();
-            String value = String.valueOf(typedTuple.getValue());
-            double currentScore = typedTuple.getScore();
-            list.add(value);
+        List<Object> schoolRankList = redisService.lList(schoolRankKey);
+        List<StudentRankVO> resultList = new ArrayList<>();
+        for (Object value : schoolRankList) {
+            resultList.add(JSON.parseObject((String) value, StudentRankVO.class));
         }
-        return list;
+        return resultList;
     }
 
     @Override

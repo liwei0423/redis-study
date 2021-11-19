@@ -5,6 +5,7 @@ import com.liwei.redisstudy.constant.RedisKeyBuilder;
 import com.liwei.redisstudy.service.IRankService;
 import com.liwei.redisstudy.service.RedisService;
 import com.liwei.redisstudy.vo.SchoolInfoVO;
+import com.liwei.redisstudy.vo.StudentRankVO;
 import com.liwei.redisstudy.vo.StudentWillVO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,6 +106,28 @@ public class StudentRankTest {
     public void executeRank() {
         boolean flag = rankService.executeRank(examId);
         System.out.println("return=" + flag);
+    }
+
+    @Test
+    public void getSchoolLastRank() {
+        StudentRankVO studentRankVO = rankService.getSchoolLastRank(examId, "1");
+        System.out.println(studentRankVO);
+    }
+
+    @Test
+    public void testMySchoolRank() {
+        String studentResultKey = RedisKeyBuilder.getKeyHashStudentResult(examId);
+        Object studentResultObject = redisService.hmGet(studentResultKey, "100000");
+        StudentRankVO studentRankVO = JSON.parseObject((String) studentResultObject, StudentRankVO.class);
+        System.out.println(studentRankVO);
+    }
+
+    @Test
+    public void testSchoolStudentList() {
+        List<StudentRankVO> list = rankService.schoolStudentList(examId, "1");
+        for (StudentRankVO studentRankVO : list) {
+            System.out.println(studentRankVO);
+        }
     }
 
 }

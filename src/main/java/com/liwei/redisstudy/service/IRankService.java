@@ -55,7 +55,7 @@ public interface IRankService {
      * @param userId
      * @return -1 未入围
      */
-    Integer mySchoolRank(String examId, String schoolId, String userId);
+    StudentRankVO mySchoolRank(String examId, String schoolId, String userId);
 
     /**
      * 获取学校入围学生清单
@@ -64,7 +64,7 @@ public interface IRankService {
      * @param schoolId
      * @return
      */
-    List<String> schoolStudentList(String examId, String schoolId);
+    List<StudentRankVO> schoolStudentList(String examId, String schoolId);
 
     /**
      * 学生志愿
