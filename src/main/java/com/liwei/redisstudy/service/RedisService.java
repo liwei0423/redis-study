@@ -329,7 +329,7 @@ public class RedisService {
         Set<ZSetOperations.TypedTuple<Object>> tuples = new LinkedHashSet<>();
         for (String member : map.keySet()) {
             Double score = map.get(member);
-            typedTuple = ZSetOperations.TypedTuple.of(member, score);
+            typedTuple = new DefaultTypedTuple<>(member, score);
             tuples.add(typedTuple);
         }
         zset.add(key, tuples);
