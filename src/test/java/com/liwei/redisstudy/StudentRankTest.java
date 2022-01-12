@@ -89,9 +89,9 @@ public class StudentRankTest {
         String keyHashSchoolRecruit = RedisKeyBuilder.getKeyHashSchoolRecruit(examId);
         redisService.remove(keyHashSchoolRecruit);
 
-        redisService.hmSet(RedisKeyBuilder.getKeyHashSchoolRecruit(examId), "11", studentRecruitJsonString(new SchoolInfoVO("11", "430000", "1", 3)));
-        redisService.hmSet(RedisKeyBuilder.getKeyHashSchoolRecruit(examId), "22", studentRecruitJsonString(new SchoolInfoVO("22", "430070", "1", 2)));
-        redisService.hmSet(RedisKeyBuilder.getKeyHashSchoolRecruit(examId), "33", studentRecruitJsonString(new SchoolInfoVO("33", "430000", "1", 2), new SchoolInfoVO("33", "430000", "2", 2)));
+        redisService.hmSet(RedisKeyBuilder.getKeyHashSchoolRecruit(examId), "11", studentRecruitJsonString(new SchoolInfoVO("11", "430000", 1, "1", 3)));
+        redisService.hmSet(RedisKeyBuilder.getKeyHashSchoolRecruit(examId), "22", studentRecruitJsonString(new SchoolInfoVO("22", "430070", 2, "1", 2)));
+        redisService.hmSet(RedisKeyBuilder.getKeyHashSchoolRecruit(examId), "33", studentRecruitJsonString(new SchoolInfoVO("33", "430000", 1, "1", 2), new SchoolInfoVO("33", "430000", 1, "2", 2)));
     }
 
     private static String studentRecruitJsonString(SchoolInfoVO... schoolIds) {

@@ -18,6 +18,9 @@ public class SchoolInfoVO {
     //招生区域
     private String region;
 
+    //招生区域级别
+    private int regionLevel;
+
     //招生种类
     private String type;
 
