@@ -16,9 +16,13 @@ public class StudentRankVO {
 
     private String userId;
 
-    private Double score;
+    private String orderNumber;
 
     private Integer rank;
 
     private String schoolId;
+
+    private String region;
+
+    private String type;
 }

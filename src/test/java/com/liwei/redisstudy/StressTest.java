@@ -1,11 +1,8 @@
 package com.liwei.redisstudy;
 
-import com.alibaba.fastjson.JSON;
 import com.liwei.redisstudy.constant.RedisKeyBuilder;
 import com.liwei.redisstudy.service.IRankService;
 import com.liwei.redisstudy.service.RedisService;
-import com.liwei.redisstudy.vo.SchoolInfoVO;
-import com.liwei.redisstudy.vo.StudentWillVO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -50,9 +47,9 @@ public class StressTest {
     public void studentScore() {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        String studentScoreKey = RedisKeyBuilder.getKeyZsetStudentScore(examId);
-        if (redisService.exists(studentScoreKey)) {
-            redisService.remove(studentScoreKey);
+        String keyHashStudentInfo = RedisKeyBuilder.getKeyHashStudentInfo(examId);
+        if (redisService.exists(keyHashStudentInfo)) {
+            redisService.remove(keyHashStudentInfo);
         }
         Map<String, Double> map = new HashMap<>();
         Random random = new Random(System.currentTimeMillis());
@@ -61,7 +58,7 @@ public class StressTest {
             double score = random.nextInt(100);
             map.put(userId, score);
         }
-        redisService.zBatchAdd(studentScoreKey, map);
+        redisService.zBatchAdd(keyHashStudentInfo, map);
         stopWatch.stop();
         System.out.println(stopWatch.getLastTaskTimeMillis());
     }
@@ -71,44 +68,44 @@ public class StressTest {
         return list.subList(0, num);
     }
 
-    @Test
-    public void studentVolunteer() {
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
-        String keyHashStudent = RedisKeyBuilder.getKeyHashStudent(examId);
-        redisService.remove(keyHashStudent);
-
-        Map<Object, Object> map = new HashMap<>();
-        for (int i = 0; i < studentNum; i++) {
-            String userId = String.valueOf(i + 1);
-            List<String> willList = listRandom(schoolList, studentWillNum);
-            map.put(userId, studentWillJsonString(willList));
-        }
-        redisService.hmBatchSet(keyHashStudent, map);
-        stopWatch.stop();
-        System.out.println(stopWatch.getLastTaskTimeMillis());
-    }
-
-    private static String studentWillJsonString(List<String> schoolIds) {
-        List<StudentWillVO> list = new ArrayList<>();
-        for (String schoolId : schoolIds) {
-            list.add(new StudentWillVO(schoolId, false));
-        }
-        return JSON.toJSONString(list);
-    }
+//    @Test
+//    public void studentVolunteer() {
+//        StopWatch stopWatch = new StopWatch();
+//        stopWatch.start();
+//        String keyHashStudent = RedisKeyBuilder.getKeyHashStudent(examId);
+//        redisService.remove(keyHashStudent);
+//
+//        Map<Object, Object> map = new HashMap<>();
+//        for (int i = 0; i < studentNum; i++) {
+//            String userId = String.valueOf(i + 1);
+//            List<String> willList = listRandom(schoolList, studentWillNum);
+//            map.put(userId, studentWillJsonString(willList));
+//        }
+//        redisService.hmBatchSet(keyHashStudent, map);
+//        stopWatch.stop();
+//        System.out.println(stopWatch.getLastTaskTimeMillis());
+//    }
+//
+//    private static String studentWillJsonString(List<String> schoolIds) {
+//        List<StudentWillVO> list = new ArrayList<>();
+//        for (String schoolId : schoolIds) {
+//            list.add(new StudentWillVO(schoolId, false));
+//        }
+//        return JSON.toJSONString(list);
+//    }
 
     @Test
     public void schoolRecruit() {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        String keyHashSchool = RedisKeyBuilder.getKeyHashSchool(examId);
-        redisService.remove(keyHashSchool);
+        String keyHashSchoolRecruit = RedisKeyBuilder.getKeyHashSchoolRecruit(examId);
+        redisService.remove(keyHashSchoolRecruit);
         Map<Object, Object> map = new HashMap<>();
         for (int i = 0; i < schoolNum; i++) {
             String schoolId = String.valueOf(i + 1);
-            map.put(schoolId, JSON.toJSONString(new SchoolInfoVO(schoolStudentNum)));
+//            map.put(schoolId, JSON.toJSONString(new SchoolInfoVO(schoolStudentNum)));
         }
-        redisService.hmBatchSet(keyHashSchool, map);
+        redisService.hmBatchSet(keyHashSchoolRecruit, map);
         stopWatch.stop();
         System.out.println(stopWatch.getLastTaskTimeMillis());
     }
@@ -118,7 +115,7 @@ public class StressTest {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         studentScore();
-        studentVolunteer();
+//        studentVolunteer();
         schoolRecruit();
         boolean flag = rankService.executeRank(examId);
         System.out.println("return=" + flag);
@@ -148,15 +145,15 @@ public class StressTest {
     }
 
     @Test
-    public void testQueryKey(){
+    public void testQueryKey() {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         String studentKey = RedisKeyBuilder.getKeyHashStudent(examId);
-        for(int i=0;i<10000;i++){
+        for (int i = 0; i < 10000; i++) {
             try {
-                Object studentWillString = redisService.hmGet(studentKey, (i+1));
-            }catch (Exception e){
-                System.out.println("###="+(i+1));
+                Object studentWillString = redisService.hmGet(studentKey, (i + 1));
+            } catch (Exception e) {
+                System.out.println("###=" + (i + 1));
                 e.printStackTrace();
             }
         }

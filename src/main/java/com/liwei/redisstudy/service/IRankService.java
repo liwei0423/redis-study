@@ -1,9 +1,11 @@
 package com.liwei.redisstudy.service;
 
+import com.liwei.redisstudy.vo.SchoolInfoVO;
+import com.liwei.redisstudy.vo.StudentInfoVO;
 import com.liwei.redisstudy.vo.StudentRankVO;
+import com.liwei.redisstudy.vo.StudentWillVO;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @description: 排名服务类
@@ -16,14 +18,14 @@ public interface IRankService {
      * 内存初始化，实时排名前调用一次
      *
      * @param examId
-     * @param studentScoreList
-     * @param schoolPersonNumList
+     * @param studentList
+     * @param schoolList
      * @return
      */
-    boolean initMemory(String examId, Map<String, Double> studentScoreList, Map<String, Integer> schoolPersonNumList);
+    boolean initMemory(String examId, List<StudentInfoVO> studentList, List<SchoolInfoVO> schoolList);
 
     /**
-     *  清理内存，投档完成可调用释放redis内存资源
+     * 清理内存，投档完成可调用释放redis内存资源
      *
      * @param examId
      * @return
@@ -45,7 +47,7 @@ public interface IRankService {
      * @param schoolId
      * @return
      */
-    StudentRankVO getSchoolLastRank(String examId, String schoolId);
+    StudentRankVO getSchoolLastRank(String examId, String schoolId, String region, String type);
 
     /**
      * 获取学生在学校的名次
@@ -64,7 +66,7 @@ public interface IRankService {
      * @param schoolId
      * @return
      */
-    List<StudentRankVO> schoolStudentList(String examId, String schoolId);
+    List<StudentRankVO> schoolStudentList(String examId, String schoolId, String region, String type);
 
     /**
      * 学生志愿
@@ -74,25 +76,23 @@ public interface IRankService {
      * @param schoolList
      * @return
      */
-    void studentWill(String examId, String userId, List<String> schoolList);
+    void studentWill(String examId, String userId, List<StudentWillVO> schoolList);
 
     /**
-     * 更改学生的分数
+     * 更改学生的基本信息
      *
      * @param examId
-     * @param userId
-     * @param score
+     * @param studentInfoVO
      * @return
      */
-    void updateStudentScore(String examId, String userId, double score);
+    boolean updateStudentInfo(String examId, StudentInfoVO studentInfoVO);
 
     /**
      * 更改学校招生人数
      *
      * @param examId
-     * @param schoolId
-     * @param personNum
+     * @param schoolInfoVOS
      * @return
      */
-    void updateSchoolInfo(String examId, String schoolId, Integer personNum);
+    boolean updateSchoolInfo(String examId, List<SchoolInfoVO> schoolInfoVOS);
 }

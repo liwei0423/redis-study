@@ -12,7 +12,7 @@ public class RedisKeyBuilder {
     /**
      * @desc: 学生分数明细
      */
-    public final static String KEY_ZSET_STUDENT_SCORE = "student_score:{0}";
+    public final static String KEY_HASH_STUDENT_INFO = "student_info:{0}";
     /**
      * @desc: 学校投档学生排名
      */
@@ -21,12 +21,12 @@ public class RedisKeyBuilder {
     /**
      * @desc: 学校投档排名
      */
-    public final static String KEY_ZSET_SCHOOL_RANK = "school_rank:{0}:{1}";
+    public final static String KEY_ZSET_SCHOOL_RANK = "school_rank:{0}:{1}:{2}:{3}";
 
     /**
      * @desc: 学生志愿
      */
-    public final static String KEY_HASH_STUDENT = "student:{0}";
+    public final static String KEY_HASH_STUDENT = "student_will:{0}";
 
     /**
      * @desc: 学生志愿结果
@@ -34,17 +34,17 @@ public class RedisKeyBuilder {
     public final static String KEY_HASH_STUDENT_RESULT = "student:result:{0}";
 
     /**
-     * @desc: 学校信息
+     * @desc: 学校招生信息
      */
-    public final static String KEY_HASH_SCHOOL = "school:{0}";
+    public final static String KEY_HASH_SCHOOL_RECRUIT = "school_recruit:{0}";
 
     /**
      * 获取所有学生分数明细key
      *
      * @param examId
      */
-    public static String getKeyZsetStudentScore(String examId) {
-        return MessageFormat.format(KEY_ZSET_STUDENT_SCORE, examId);
+    public static String getKeyHashStudentInfo(String examId) {
+        return MessageFormat.format(KEY_HASH_STUDENT_INFO, examId);
     }
 
     /**
@@ -79,8 +79,8 @@ public class RedisKeyBuilder {
      *
      * @param examId
      */
-    public static String getKeyHashSchool(String examId) {
-        return MessageFormat.format(KEY_HASH_SCHOOL, examId);
+    public static String getKeyHashSchoolRecruit(String examId) {
+        return MessageFormat.format(KEY_HASH_SCHOOL_RECRUIT, examId);
     }
 
     /**
@@ -89,8 +89,8 @@ public class RedisKeyBuilder {
      * @param examId
      * @param schoolId
      */
-    public static String getKeyZsetSchoolRank(String examId, String schoolId) {
-        return MessageFormat.format(KEY_ZSET_SCHOOL_RANK, examId, schoolId);
+    public static String getKeyZsetSchoolRank(String examId, String schoolId,String region,String type) {
+        return MessageFormat.format(KEY_ZSET_SCHOOL_RANK, examId, schoolId,region,type);
     }
 
 }

@@ -14,6 +14,7 @@ public class StudentWillVO {
 
     private String schoolId;
 
-    private Boolean success;
+    //招生种类
+    private String type;
 
 }

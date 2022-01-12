@@ -12,5 +12,15 @@ import lombok.Data;
 @AllArgsConstructor
 public class SchoolInfoVO {
 
+    //学校编码
+    private String schoolId;
+
+    //招生区域
+    private String region;
+
+    //招生种类
+    private String type;
+
+    //招生人数
     private int personNum;
 }

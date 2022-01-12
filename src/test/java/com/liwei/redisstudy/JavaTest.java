@@ -33,8 +33,8 @@ public class JavaTest {
         stopWatch.start();
         for(int i=0;i<100000;i++){
             List<StudentWillVO> list = new ArrayList<>();
-            list.add(new StudentWillVO("11", false));
-            list.add(new StudentWillVO("22", false));
+//            list.add(new StudentWillVO("11", false));
+//            list.add(new StudentWillVO("22", false));
             String jsonString = JSONObject.toJSONString(list);
 //            System.out.println(jsonString);
             List<StudentWillVO> list2 = JSON.parseArray(jsonString, StudentWillVO.class);
@@ -51,6 +51,15 @@ public class JavaTest {
     public void testJsonArray(){
         String studentWillString="[{\"schoolId\":\"53\",\"success\":false},{\"schoolId\":\"24\",\"success\":false},{\"schoolId\":\"6\",\"success\":false},{\"schoolId\":\"77\",\"success\":false},{\"schoolId\":\"43\",\"success\":false}]";
         List<StudentWillVO> list = JSON.parseArray(studentWillString,StudentWillVO.class);
+    }
+
+    @Test
+    public void test(){
+        String a1 = "123";
+        String b1 = "125";
+        System.out.println(a1.compareTo(a1));
+        System.out.println(a1.compareTo(b1));
+        System.out.println(b1.compareTo(a1));
     }
 
 }

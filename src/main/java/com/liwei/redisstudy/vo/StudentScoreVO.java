@@ -15,4 +15,6 @@ public class StudentScoreVO {
     private String userId;
 
     private Double score;
+
+    private String orderNumber;
 }
