@@ -1,8 +1,10 @@
 package com.liwei.redisstudy;
 
+import com.alibaba.fastjson.JSON;
 import com.liwei.redisstudy.constant.RedisKeyBuilder;
 import com.liwei.redisstudy.service.IRankService;
 import com.liwei.redisstudy.service.RedisService;
+import com.liwei.redisstudy.vo.StudentWillVO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -68,31 +70,31 @@ public class StressTest {
         return list.subList(0, num);
     }
 
-//    @Test
-//    public void studentVolunteer() {
-//        StopWatch stopWatch = new StopWatch();
-//        stopWatch.start();
-//        String keyHashStudent = RedisKeyBuilder.getKeyHashStudent(examId);
-//        redisService.remove(keyHashStudent);
-//
-//        Map<Object, Object> map = new HashMap<>();
-//        for (int i = 0; i < studentNum; i++) {
-//            String userId = String.valueOf(i + 1);
-//            List<String> willList = listRandom(schoolList, studentWillNum);
-//            map.put(userId, studentWillJsonString(willList));
-//        }
-//        redisService.hmBatchSet(keyHashStudent, map);
-//        stopWatch.stop();
-//        System.out.println(stopWatch.getLastTaskTimeMillis());
-//    }
-//
-//    private static String studentWillJsonString(List<String> schoolIds) {
-//        List<StudentWillVO> list = new ArrayList<>();
-//        for (String schoolId : schoolIds) {
-//            list.add(new StudentWillVO(schoolId, false));
-//        }
-//        return JSON.toJSONString(list);
-//    }
+    @Test
+    public void studentVolunteer() {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        String keyHashStudent = RedisKeyBuilder.getKeyHashStudent(examId);
+        redisService.remove(keyHashStudent);
+
+        Map<Object, Object> map = new HashMap<>();
+        for (int i = 0; i < studentNum; i++) {
+            String userId = String.valueOf(i + 1);
+            List<String> willList = listRandom(schoolList, studentWillNum);
+            map.put(userId, studentWillJsonString(willList));
+        }
+        redisService.hmBatchSet(keyHashStudent, map);
+        stopWatch.stop();
+        System.out.println(stopWatch.getLastTaskTimeMillis());
+    }
+
+    private static String studentWillJsonString(List<String> schoolIds) {
+        List<StudentWillVO> list = new ArrayList<>();
+        for (String schoolId : schoolIds) {
+            list.add(StudentWillVO.builder().wishId("101").schoolId(schoolId).type("1").build());
+        }
+        return JSON.toJSONString(list);
+    }
 
     @Test
     public void schoolRecruit() {

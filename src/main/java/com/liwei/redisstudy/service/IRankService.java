@@ -6,6 +6,7 @@ import com.liwei.redisstudy.vo.StudentRankVO;
 import com.liwei.redisstudy.vo.StudentWillVO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @description: 排名服务类
@@ -44,10 +45,11 @@ public interface IRankService {
      * 获取学校入围最后一名的学生信息
      *
      * @param examId
-     * @param schoolId
+     * @param schoolId 非必填
+     * @param type 非必填
      * @return
      */
-    StudentRankVO getSchoolLastRank(String examId, String schoolId, String region, String type);
+    List<StudentRankVO> getSchoolLastRank(String examId, String schoolId, String type);
 
     /**
      * 获取学生在学校的名次
@@ -77,6 +79,15 @@ public interface IRankService {
      * @return
      */
     void studentWill(String examId, String userId, List<StudentWillVO> schoolList);
+
+    /**
+     * 批量学生志愿
+     *
+     * @param examId
+     * @param map:   key为userId
+     * @return
+     */
+    void batchStudentWill(String examId, Map<String, List<StudentWillVO>> map);
 
     /**
      * 更改学生的基本信息

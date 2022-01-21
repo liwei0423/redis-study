@@ -89,8 +89,8 @@ public class RedisKeyBuilder {
      * @param examId
      * @param schoolId
      */
-    public static String getKeyZsetSchoolRank(String examId, String schoolId,String region,String type) {
-        return MessageFormat.format(KEY_ZSET_SCHOOL_RANK, examId, schoolId,region,type);
+    public static String getKeyZsetSchoolRank(String examId, String schoolId, String type, String region) {
+        return MessageFormat.format(KEY_ZSET_SCHOOL_RANK, examId, schoolId, type, region);
     }
 
 }
