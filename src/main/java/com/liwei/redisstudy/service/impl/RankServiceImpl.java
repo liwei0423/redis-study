@@ -4,12 +4,10 @@ import cn.hutool.core.collection.CollUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.liwei.redisstudy.constant.RedisKeyBuilder;
+import com.liwei.redisstudy.enums.RegionLevel;
 import com.liwei.redisstudy.service.IRankService;
 import com.liwei.redisstudy.service.RedisService;
-import com.liwei.redisstudy.vo.SchoolInfoVO;
-import com.liwei.redisstudy.vo.StudentInfoVO;
-import com.liwei.redisstudy.vo.StudentRankVO;
-import com.liwei.redisstudy.vo.StudentWillVO;
+import com.liwei.redisstudy.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -85,45 +83,55 @@ public class RankServiceImpl implements IRankService {
         Map<Object, Object> studentWillMap = redisService.hmGetTall(studentKey);
         Map<Object, Object> schoolInfoMap = redisService.hmGetTall(keyHashSchoolRecruit);
         //学生由高到底
-        List<StudentInfoVO> result = studentScoreOrder(examId);
-        for (StudentInfoVO studentInfoVO : result) {
+        List<StudentInfoVO> studentInfoVOS = studentScoreOrder(examId);
+        for (StudentInfoVO studentInfoVO : studentInfoVOS) {
             String userId = studentInfoVO.getUserId();
             String orderNumber = studentInfoVO.getOrderNumber();
             //学生所在区域
             String area = studentInfoVO.getArea();
             //学生志愿信息
             List<StudentWillVO> studentWillVOS = JSONObject.parseArray((String) studentWillMap.get(userId), StudentWillVO.class);
+            nextStudent:
             for (StudentWillVO studentWillVO : studentWillVOS) {
                 //学生志愿校
                 String schoolId = studentWillVO.getSchoolId();
                 //学生志愿种类
                 String type = studentWillVO.getType();
-                List<SchoolInfoVO> schoolInfoVOS = JSON.parseArray((String) schoolInfoMap.get(schoolId), SchoolInfoVO.class);
-                //TODO 学生投档学校下的招生
-                //学校招生人数
-                Integer personNum = schoolInfoVOS.get(0).getPersonNum();
-                //学校招生区域
-                String region = schoolInfoVOS.get(0).getRecruitList().get(0).getRegion();
-//                if (!region.equals(area)) {
-//                    continue;
-//                }
-                //学校投档key
-                String schoolRankMapKey = RedisKeyBuilder.getKeyZsetSchoolRank(examId, schoolId, type, region);
-                StudentRankVO lastStudentRankVO = getSchoolLastStudent(schoolRankMapKey, schoolRankMap);
-                if (lastStudentRankVO == null || lastStudentRankVO.getRank() < personNum) {
-                    //入围
-                    List<Object> list;
-                    if (schoolRankMap.containsKey(schoolRankMapKey)) {
-                        list = schoolRankMap.get(schoolRankMapKey);
-                    } else {
-                        list = new ArrayList();
+                List<SchoolInfoVO> schoolInfoList = JSON.parseArray((String) schoolInfoMap.get(schoolId), SchoolInfoVO.class);
+                //学生填报学校的招生信息
+                SchoolInfoVO schoolInfoVO = getStudentSchoolInfo(schoolInfoList, type);
+                if (schoolInfoVO == null) {
+                    //学校无此招生信息
+                    continue;
+                }
+                //招生人数
+                Integer personNum = schoolInfoVO.getPersonNum();
+                //招生区域集合
+                List<RecruitVO> recruitList = schoolInfoVO.getRecruitList();
+                for (RecruitVO recruitVO : recruitList) {
+                    if (isMatchSchoolInfoRegion(studentInfoVO, recruitVO)) {
+                        //符合学校区域招生
+                        String schoolRankMapKey = RedisKeyBuilder.getKeyZsetSchoolRank(examId, schoolId, type, recruitVO.getRegion());
+                        StudentRankVO lastStudentRankVO = getSchoolLastStudent(schoolRankMapKey, schoolRankMap);
+                        if (lastStudentRankVO == null || lastStudentRankVO.getRank() < personNum) {
+                            //入围
+                            List<Object> list;
+                            if (schoolRankMap.containsKey(schoolRankMapKey)) {
+                                list = schoolRankMap.get(schoolRankMapKey);
+                            } else {
+                                list = new ArrayList();
+                            }
+                            Integer rank = lastStudentRankVO == null ? 1 : (orderNumber.compareTo(lastStudentRankVO.getOrderNumber()) < 0 ? lastStudentRankVO.getRank() + 1 : lastStudentRankVO.getRank());
+                            StudentRankVO currentStudentRankVO = StudentRankVO.builder().userId(userId).orderNumber(orderNumber).rank(rank).wishId(studentWillVO.getWishId()).schoolId(schoolId)
+                                    .region(recruitVO.getRegion()).regionLevel(recruitVO.getRegionLevel().getCode()).type(type).calcTime(calcTime).recruitCode(schoolInfoVO.getRecruitCode())
+                                    .schoolName(schoolInfoVO.getSchoolName()).zoneName(schoolInfoVO.getZoneName()).recruitKindName(schoolInfoVO.getRecruitKindName()).build();
+                            currentStudentRankVO.setStudentInfoVO(studentInfoVO);
+                            list.add(JSON.toJSONString(currentStudentRankVO));
+                            schoolRankMap.put(schoolRankMapKey, list);
+                            studentRankMap.put(userId, JSON.toJSONString(currentStudentRankVO));
+                            break nextStudent;
+                        }
                     }
-                    Integer rank = lastStudentRankVO == null ? 1 : (orderNumber.compareTo(lastStudentRankVO.getOrderNumber()) < 0 ? lastStudentRankVO.getRank() + 1 : lastStudentRankVO.getRank());
-                    StudentRankVO currentStudentRankVO = StudentRankVO.builder().userId(userId).orderNumber(orderNumber).rank(rank).schoolId(schoolId).region(region).type(type).calcTime(calcTime).build();
-                    list.add(JSON.toJSONString(currentStudentRankVO));
-                    schoolRankMap.put(schoolRankMapKey, list);
-                    studentRankMap.put(userId, JSON.toJSONString(currentStudentRankVO));
-                    break;
                 }
             }
         }
@@ -133,6 +141,37 @@ public class RankServiceImpl implements IRankService {
         }
         redisService.hmBatchSet(studentResultKey, studentRankMap);
         return true;
+    }
+
+
+    private boolean isMatchSchoolInfoRegion(StudentInfoVO studentInfoVO, RecruitVO recruitVO) {
+        RegionLevel regionLevel = recruitVO.getRegionLevel();
+        String region = recruitVO.getRegion();
+        switch (regionLevel) {
+            case PROVINCE:
+            case CITY:
+                return true;
+            case AREA:
+                return region.equals(studentInfoVO.getArea());
+            case TOWN:
+                return region.equals(studentInfoVO.getTown());
+            case SCHOOL:
+                return region.equals(studentInfoVO.getSchoolId());
+            case STUDENT_CODE:
+                return region.equals(studentInfoVO.getUserId());
+        }
+        return false;
+    }
+
+    private SchoolInfoVO getStudentSchoolInfo(List<SchoolInfoVO> schoolInfoList, String type) {
+        if (CollUtil.isNotEmpty(schoolInfoList)) {
+            for (SchoolInfoVO schoolInfoVO : schoolInfoList) {
+                if (schoolInfoVO.getType().equals(type)) {
+                    return schoolInfoVO;
+                }
+            }
+        }
+        return null;
     }
 
     public List<StudentInfoVO> studentScoreOrder(String examId) {
@@ -228,7 +267,6 @@ public class RankServiceImpl implements IRankService {
                 resultList.add(studentRankList);
             }
         }
-
         return resultList;
     }
 

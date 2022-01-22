@@ -1,5 +1,6 @@
 package com.liwei.redisstudy.vo;
 
+import com.liwei.redisstudy.enums.RegionLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,7 +20,7 @@ public class RecruitVO {
     /**
      *  招生区域级别：1 省；2 市；3 区县；4 乡镇；5 学校；6 学生编码
      */
-    private Integer regionLevel;
+    private RegionLevel regionLevel;
 
     /**
      * 招生区域

@@ -79,8 +79,6 @@ public class StudentInfoVO implements Comparable<StudentInfoVO> {
     private String sw;
 
 
-
-
     @Override
     public int compareTo(StudentInfoVO o) {
         return this.orderNumber.compareTo(o.getOrderNumber());

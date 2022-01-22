@@ -28,6 +28,8 @@ public class StudentRankVO {
 
     private String region;
 
+    private Integer regionLevel;
+
     private String type;
 
     //开始计算时间
