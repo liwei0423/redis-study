@@ -32,15 +32,15 @@ public class StudentRankTest {
 
         String studentInfoKey = RedisKeyBuilder.getKeyHashStudentInfo(examId);
         redisService.remove(studentInfoKey);
-        redisService.hmSet(studentInfoKey, "1", JSON.toJSONString(StudentInfoVO.builder().userId("1").schoolId("11").town("t1").area("a1").orderNumber("1234").build()));
-        redisService.hmSet(studentInfoKey, "2", JSON.toJSONString(StudentInfoVO.builder().userId("2").schoolId("11").town("t1").area("a1").orderNumber("1111").build()));
-        redisService.hmSet(studentInfoKey, "3", JSON.toJSONString(StudentInfoVO.builder().userId("3").schoolId("11").town("t1").area("a1").orderNumber("2222").build()));
-        redisService.hmSet(studentInfoKey, "4", JSON.toJSONString(StudentInfoVO.builder().userId("4").schoolId("11").town("t1").area("a1").orderNumber("1212").build()));
-        redisService.hmSet(studentInfoKey, "5", JSON.toJSONString(StudentInfoVO.builder().userId("5").schoolId("11").town("t1").area("a1").orderNumber("2222").build()));
-        redisService.hmSet(studentInfoKey, "6", JSON.toJSONString(StudentInfoVO.builder().userId("6").schoolId("11").town("t1").area("a1").orderNumber("2122").build()));
-        redisService.hmSet(studentInfoKey, "7", JSON.toJSONString(StudentInfoVO.builder().userId("7").schoolId("11").town("t1").area("a1").orderNumber("1322").build()));
-        redisService.hmSet(studentInfoKey, "8", JSON.toJSONString(StudentInfoVO.builder().userId("8").schoolId("11").town("t1").area("a1").orderNumber("1231").build()));
-        redisService.hmSet(studentInfoKey, "9", JSON.toJSONString(StudentInfoVO.builder().userId("9").schoolId("11").town("t1").area("a1").orderNumber("2322").build()));
+        redisService.hmSet(studentInfoKey, "1", JSON.toJSONString(StudentInfoVO.builder().userId("1").schoolId("11").town("t1").area("a1").orderNumber("1234").nameCn("张三").build()));
+        redisService.hmSet(studentInfoKey, "2", JSON.toJSONString(StudentInfoVO.builder().userId("2").schoolId("11").town("t1").area("a1").orderNumber("1111").nameCn("李四").build()));
+        redisService.hmSet(studentInfoKey, "3", JSON.toJSONString(StudentInfoVO.builder().userId("3").schoolId("11").town("t1").area("a1").orderNumber("2222").nameCn("王五").build()));
+        redisService.hmSet(studentInfoKey, "4", JSON.toJSONString(StudentInfoVO.builder().userId("4").schoolId("11").town("t1").area("a1").orderNumber("1212").nameCn("赵六").build()));
+        redisService.hmSet(studentInfoKey, "5", JSON.toJSONString(StudentInfoVO.builder().userId("5").schoolId("11").town("t1").area("a1").orderNumber("2222").nameCn("张1").build()));
+        redisService.hmSet(studentInfoKey, "6", JSON.toJSONString(StudentInfoVO.builder().userId("6").schoolId("11").town("t1").area("a1").orderNumber("2122").nameCn("张2").build()));
+        redisService.hmSet(studentInfoKey, "7", JSON.toJSONString(StudentInfoVO.builder().userId("7").schoolId("11").town("t1").area("a1").orderNumber("1322").nameCn("张3").build()));
+        redisService.hmSet(studentInfoKey, "8", JSON.toJSONString(StudentInfoVO.builder().userId("8").schoolId("11").town("t1").area("a1").orderNumber("1231").nameCn("张4").build()));
+        redisService.hmSet(studentInfoKey, "9", JSON.toJSONString(StudentInfoVO.builder().userId("9").schoolId("11").town("t1").area("a1").orderNumber("2322").nameCn("张5").build()));
     }
 
     @Test
@@ -153,8 +153,8 @@ public class StudentRankTest {
 
     @Test
     public void testSchoolStudentList() {
-        List<StudentRankVO> list = rankService.schoolStudentList(examId, "11", "430000", "1");
-        for (StudentRankVO studentRankVO : list) {
+        List<List<StudentRankVO>> list = rankService.schoolStudentList(examId, null, null, "1");
+        for (List<StudentRankVO> studentRankVO : list) {
             System.out.println(studentRankVO);
         }
     }

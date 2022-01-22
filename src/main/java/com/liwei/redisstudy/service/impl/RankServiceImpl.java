@@ -209,13 +209,26 @@ public class RankServiceImpl implements IRankService {
     }
 
     @Override
-    public List<StudentRankVO> schoolStudentList(String examId, String schoolId, String region, String type) {
-        String schoolRankKey = RedisKeyBuilder.getKeyZsetSchoolRank(examId, schoolId, type, region);
-        List<Object> schoolRankList = redisService.lList(schoolRankKey);
-        List<StudentRankVO> resultList = new ArrayList<>();
-        for (Object value : schoolRankList) {
-            resultList.add(JSON.parseObject((String) value, StudentRankVO.class));
+    public List<List<StudentRankVO>> schoolStudentList(String examId, String schoolId, String region, String type) {
+        List<List<StudentRankVO>> resultList = new ArrayList<>();
+        String schoolRankPattern = RedisKeyBuilder.getKeyZsetSchoolRank(examId, schoolId == null ? "*" : schoolId, type == null ? "*" : type, region == null ? "*" : region);
+        String keyHashStudentInfo = RedisKeyBuilder.getKeyHashStudentInfo(examId);
+        Map<Object, Object> studentInfoMap = redisService.hmGetTall(keyHashStudentInfo);
+        Set<String> schoolRankSet = redisService.keys(schoolRankPattern);
+        if (CollUtil.isNotEmpty(schoolRankSet)) {
+            for (String schoolRankKey : schoolRankSet) {
+                List<Object> schoolRankList = redisService.lList(schoolRankKey);
+                List<StudentRankVO> studentRankList = new ArrayList<>();
+                for (Object value : schoolRankList) {
+                    StudentRankVO studentRankVO = JSON.parseObject((String) value, StudentRankVO.class);
+                    StudentInfoVO studentInfoVO = JSON.parseObject((String) studentInfoMap.get(studentRankVO.getUserId()), StudentInfoVO.class);
+                    studentRankVO.setStudentInfoVO(studentInfoVO);
+                    studentRankList.add(studentRankVO);
+                }
+                resultList.add(studentRankList);
+            }
         }
+
         return resultList;
     }
 

@@ -64,11 +64,13 @@ public interface IRankService {
     /**
      * 获取学校入围学生清单
      *
-     * @param examId
-     * @param schoolId
+     * @param examId 必填
+     * @param schoolId 非必填
+     * @param region 非必填
+     * @param type 非必填
      * @return
      */
-    List<StudentRankVO> schoolStudentList(String examId, String schoolId, String region, String type);
+    List<List<StudentRankVO>> schoolStudentList(String examId, String schoolId, String region, String type);
 
     /**
      * 学生志愿
