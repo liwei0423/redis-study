@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @description: 招生信息
+ * @description: 招生区域
  * @author: liwei
  * @date: 2022/1/21
  */
@@ -17,9 +17,9 @@ import lombok.NoArgsConstructor;
 public class RecruitVO {
 
     /**
-     *  招生区域级别：1省；2市；3区县；4乡镇；5学校；6学生编码
+     *  招生区域级别：1 省；2 市；3 区县；4 乡镇；5 学校；6 学生编码
      */
-    private int regionLevel;
+    private Integer regionLevel;
 
     /**
      * 招生区域

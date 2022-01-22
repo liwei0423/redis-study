@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * @description: 学校招生信息
+ * @description: 学校招生
  * @author: liwei
  * @date: 2021/11/17
  */
@@ -34,7 +34,7 @@ public class SchoolInfoVO {
     private List<RecruitVO> recruitList;
 
     //招生人数
-    private int personNum;
+    private Integer personNum;
 
 
     /******副属性 *********/

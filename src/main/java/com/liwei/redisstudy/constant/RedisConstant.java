@@ -1,7 +1,7 @@
 package com.liwei.redisstudy.constant;
 
 /**
- * @description:
+ * @description: Redis常量类
  * @author: liwei
  * @date: 2021/11/12
  */

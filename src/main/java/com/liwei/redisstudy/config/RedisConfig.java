@@ -13,7 +13,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.*;
 
 /**
- * @description:
+ * @description: Redis配置
  * @author: liwei
  * @date: 2021/11/10
  */

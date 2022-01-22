@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @description:
+ * @description: Redis基础服务类
  * @author: liwei
  * @date: 2021/11/10
  */

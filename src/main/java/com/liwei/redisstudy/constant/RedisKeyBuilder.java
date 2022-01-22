@@ -3,7 +3,7 @@ package com.liwei.redisstudy.constant;
 import java.text.MessageFormat;
 
 /**
- * @description:
+ * @description: Redis key构建类
  * @author: liwei
  * @date: 2021/11/12
  */
