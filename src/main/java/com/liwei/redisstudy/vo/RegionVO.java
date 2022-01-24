@@ -6,30 +6,24 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 /**
- * @description: 招生区域
+ * @description: 招生区域明细
  * @author: liwei
- * @date: 2022/1/21
+ * @date: 2022/1/24
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RecruitVO {
+public class RegionVO {
 
     /**
-     * 招生区域代码
+     *  招生区域级别：1 省；2 市；3 区县；4 乡镇；5 学校；6 学生编码
      */
-    private String codeZone;
-
-    //招生区域名称
-    private String zoneName;
+    private RegionLevel regionLevel;
 
     /**
-     * 招生区域明细
+     * 招生区域
      */
-    List<RegionVO> regionList;
-
+    private String region;
 }

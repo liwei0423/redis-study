@@ -109,9 +109,9 @@ public class RankServiceImpl implements IRankService {
                 //招生区域集合
                 List<RecruitVO> recruitList = schoolInfoVO.getRecruitList();
                 for (RecruitVO recruitVO : recruitList) {
-                    if (isMatchSchoolInfoRegion(studentInfoVO, recruitVO)) {
+                    if (isMatchRecruit(studentInfoVO, recruitVO)) {
                         //符合学校区域招生
-                        String schoolRankMapKey = RedisKeyBuilder.getKeyZsetSchoolRank(examId, schoolId, type, recruitVO.getRegion());
+                        String schoolRankMapKey = RedisKeyBuilder.getKeyZsetSchoolRank(examId, schoolId, type, recruitVO.getCodeZone());
                         StudentRankVO lastStudentRankVO = getSchoolLastStudent(schoolRankMapKey, schoolRankMap);
                         if (lastStudentRankVO == null || lastStudentRankVO.getRank() < personNum) {
                             //入围
@@ -123,8 +123,8 @@ public class RankServiceImpl implements IRankService {
                             }
                             Integer rank = lastStudentRankVO == null ? 1 : (orderNumber.compareTo(lastStudentRankVO.getOrderNumber()) < 0 ? lastStudentRankVO.getRank() + 1 : lastStudentRankVO.getRank());
                             StudentRankVO currentStudentRankVO = StudentRankVO.builder().userId(userId).orderNumber(orderNumber).rank(rank).wishId(studentWillVO.getWishId()).schoolId(schoolId)
-                                    .region(recruitVO.getRegion()).regionLevel(recruitVO.getRegionLevel().getCode()).type(type).calcTime(calcTime).recruitCode(schoolInfoVO.getRecruitCode())
-                                    .schoolName(schoolInfoVO.getSchoolName()).zoneName(schoolInfoVO.getZoneName()).recruitKindName(schoolInfoVO.getRecruitKindName()).build();
+                                    .codeZone(recruitVO.getCodeZone()).type(type).calcTime(calcTime).recruitCode(schoolInfoVO.getRecruitCode()).zoneName(recruitVO.getZoneName())
+                                    .schoolName(schoolInfoVO.getSchoolName()).recruitKindName(schoolInfoVO.getRecruitKindName()).build();
                             currentStudentRankVO.setStudentInfoVO(studentInfoVO);
                             list.add(JSON.toJSONString(currentStudentRankVO));
                             schoolRankMap.put(schoolRankMapKey, list);
@@ -143,10 +143,19 @@ public class RankServiceImpl implements IRankService {
         return true;
     }
 
+    private boolean isMatchRecruit(StudentInfoVO studentInfoVO, RecruitVO recruitVO) {
+        List<RegionVO> regionList = recruitVO.getRegionList();
+        for (RegionVO regionVO : regionList) {
+            if (isMatchRegion(studentInfoVO, regionVO)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-    private boolean isMatchSchoolInfoRegion(StudentInfoVO studentInfoVO, RecruitVO recruitVO) {
-        RegionLevel regionLevel = recruitVO.getRegionLevel();
-        String region = recruitVO.getRegion();
+    private boolean isMatchRegion(StudentInfoVO studentInfoVO, RegionVO regionVO) {
+        RegionLevel regionLevel = regionVO.getRegionLevel();
+        String region = regionVO.getRegion();
         switch (regionLevel) {
             case PROVINCE:
             case CITY:
@@ -248,8 +257,8 @@ public class RankServiceImpl implements IRankService {
     }
 
     @Override
-    public List<List<StudentRankVO>> schoolStudentList(String examId, String schoolId, String region, String type) {
-        List<List<StudentRankVO>> resultList = new ArrayList<>();
+    public List<StudentRankVO> schoolStudentList(String examId, String schoolId, String region, String type) {
+        List<StudentRankVO> resultList = new ArrayList<>();
         String schoolRankPattern = RedisKeyBuilder.getKeyZsetSchoolRank(examId, schoolId == null ? "*" : schoolId, type == null ? "*" : type, region == null ? "*" : region);
         String keyHashStudentInfo = RedisKeyBuilder.getKeyHashStudentInfo(examId);
         Map<Object, Object> studentInfoMap = redisService.hmGetTall(keyHashStudentInfo);
@@ -257,14 +266,12 @@ public class RankServiceImpl implements IRankService {
         if (CollUtil.isNotEmpty(schoolRankSet)) {
             for (String schoolRankKey : schoolRankSet) {
                 List<Object> schoolRankList = redisService.lList(schoolRankKey);
-                List<StudentRankVO> studentRankList = new ArrayList<>();
                 for (Object value : schoolRankList) {
                     StudentRankVO studentRankVO = JSON.parseObject((String) value, StudentRankVO.class);
                     StudentInfoVO studentInfoVO = JSON.parseObject((String) studentInfoMap.get(studentRankVO.getUserId()), StudentInfoVO.class);
                     studentRankVO.setStudentInfoVO(studentInfoVO);
-                    studentRankList.add(studentRankVO);
+                    resultList.add(studentRankVO);
                 }
-                resultList.add(studentRankList);
             }
         }
         return resultList;

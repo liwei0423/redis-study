@@ -26,11 +26,12 @@ public class StudentRankVO {
 
     private String schoolId;
 
-    private String region;
-
-    private Integer regionLevel;
-
     private String type;
+
+    /**
+     * 招生区域代码
+     */
+    private String codeZone;
 
     //开始计算时间
     private String calcTime;

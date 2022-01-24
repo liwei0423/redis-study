@@ -44,9 +44,9 @@ public interface IRankService {
     /**
      * 获取学校入围最后一名的学生信息
      *
-     * @param examId 必填
+     * @param examId   必填
      * @param schoolId 非必填
-     * @param type 非必填
+     * @param type     非必填
      * @return
      */
     List<StudentRankVO> getSchoolLastRank(String examId, String schoolId, String type);
@@ -54,9 +54,9 @@ public interface IRankService {
     /**
      * 获取学生在学校的名次
      *
-     * @param examId 必填
+     * @param examId   必填
      * @param schoolId 必填
-     * @param userId 必填
+     * @param userId   必填
      * @return null 未入围
      */
     StudentRankVO mySchoolRank(String examId, String schoolId, String userId);
@@ -64,13 +64,13 @@ public interface IRankService {
     /**
      * 获取学校入围学生清单
      *
-     * @param examId 必填
+     * @param examId   必填
      * @param schoolId 非必填
-     * @param region 非必填
-     * @param type 非必填
+     * @param region   非必填
+     * @param type     非必填
      * @return
      */
-    List<List<StudentRankVO>> schoolStudentList(String examId, String schoolId, String region, String type);
+    List<StudentRankVO> schoolStudentList(String examId, String schoolId, String region, String type);
 
     /**
      * 学生志愿
@@ -86,7 +86,7 @@ public interface IRankService {
      * 批量学生志愿
      *
      * @param examId
-     * @param map: key为userId
+     * @param map:   key为userId
      * @return
      */
     void batchStudentWill(String examId, Map<String, List<StudentWillVO>> map);

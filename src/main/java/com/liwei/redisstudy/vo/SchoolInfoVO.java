@@ -29,7 +29,7 @@ public class SchoolInfoVO {
     private String type;
 
     /**
-     *  招生区域集合
+     *  招生区域
      */
     private List<RecruitVO> recruitList;
 
@@ -44,9 +44,6 @@ public class SchoolInfoVO {
 
     //招生学校名称
     private String schoolName;
-
-    //招生区域名称
-    private String zoneName;
 
     //招生种类名称
     private String recruitKindName;
