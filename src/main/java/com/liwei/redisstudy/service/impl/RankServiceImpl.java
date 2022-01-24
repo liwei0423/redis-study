@@ -113,7 +113,7 @@ public class RankServiceImpl implements IRankService {
                         //符合学校区域招生
                         String schoolRankMapKey = RedisKeyBuilder.getKeyZsetSchoolRank(examId, schoolId, type, recruitVO.getCodeZone());
                         StudentRankVO lastStudentRankVO = getSchoolLastStudent(schoolRankMapKey, schoolRankMap);
-                        if (lastStudentRankVO == null || lastStudentRankVO.getRank() < personNum) {
+                        if (lastStudentRankVO == null || lastStudentRankVO.getRank() <= personNum) {
                             //入围
                             List<Object> list;
                             if (schoolRankMap.containsKey(schoolRankMapKey)) {
