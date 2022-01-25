@@ -20,10 +20,10 @@ public interface IRankService {
      *
      * @param examId
      * @param studentList
-     * @param schoolList
+     * @param schoolInfoMap
      * @return
      */
-    boolean initMemory(String examId, List<StudentInfoVO> studentList, List<SchoolInfoVO> schoolList);
+    boolean initMemory(String examId, List<StudentInfoVO> studentList, Map<String, List<SchoolInfoVO>> schoolInfoMap);
 
     /**
      * 清理内存，投档完成可调用释放redis内存资源
