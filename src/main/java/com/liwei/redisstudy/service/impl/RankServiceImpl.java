@@ -2,6 +2,7 @@ package com.liwei.redisstudy.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.liwei.redisstudy.constant.RedisKeyBuilder;
 import com.liwei.redisstudy.enums.RegionLevel;
@@ -40,7 +41,7 @@ public class RankServiceImpl implements IRankService {
         //装载学校招生
         Map<Object, Object> map = new HashMap<>();
         for (SchoolInfoVO schoolInfoVO : schoolList) {
-            map.put(schoolInfoVO.getSchoolId(), JSON.toJSONString(schoolInfoVO));
+            map.put(schoolInfoVO.getSchoolId(), JSONArray.toJSONString(schoolInfoVO));
         }
         String keyHashSchoolRecruit = RedisKeyBuilder.getKeyHashSchoolRecruit(examId);
         redisService.hmBatchSet(keyHashSchoolRecruit, map);
