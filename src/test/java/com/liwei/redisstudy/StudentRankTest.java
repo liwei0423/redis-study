@@ -131,6 +131,14 @@ public class StudentRankTest {
         return list;
     }
 
+    private static List<RegionVO> regionVOSToList(RegionVO... regionVOS) {
+        List<RegionVO> list = new ArrayList<>();
+        for (RegionVO regionVO : regionVOS) {
+            list.add(regionVO);
+        }
+        return list;
+    }
+
     @Test
     public void testZsetBatchAdd() {
         String studentInfoKey = RedisKeyBuilder.getKeyHashStudentInfo(examId);
@@ -204,27 +212,19 @@ public class StudentRankTest {
         studentList.add(StudentInfoVO.builder().userId("p9").schoolId("光谷实验中学").town("光谷大道").area("洪山区").orderNumber("9").nameCn("张5").build());
         Map<String, List<SchoolInfoVO>> map = new HashMap<>();
         List<RecruitVO> list1 = new ArrayList<>();
-        List<RegionVO> regionVOS1 = new ArrayList<>();
-        regionVOS1.add(RegionVO.builder().regionLevel(RegionLevel.AREA).region("洪山区").build());
-        regionVOS1.add(RegionVO.builder().regionLevel(RegionLevel.STUDENT_CODE).region("123").build());
-        list1.add(RecruitVO.builder().codeZone("111").zoneName("洪山青山区域").regionList(regionVOS1).build());
+        list1.add(RecruitVO.builder().codeZone("111").zoneName("洪山青山区域").regionList(regionVOSToList(RegionVO.builder().regionLevel(RegionLevel.AREA).region("洪山区").build()
+                , RegionVO.builder().regionLevel(RegionLevel.STUDENT_CODE).region("123").build())).build());
         map.put("光谷二高", studentRecruitToList(SchoolInfoVO.builder().schoolId("光谷三初").recruitList(list1).type("1").personNum(3).build()));
         List<RecruitVO> list2 = new ArrayList<>();
-        List<RegionVO> regionVOS2 = new ArrayList<>();
-        regionVOS2.add(RegionVO.builder().regionLevel(RegionLevel.AREA).region("洪山区").build());
-        regionVOS2.add(RegionVO.builder().regionLevel(RegionLevel.STUDENT_CODE).region("123").build());
-        list2.add(RecruitVO.builder().codeZone("222").zoneName("武汉市洪山区").regionList(regionVOS2).build());
+        list2.add(RecruitVO.builder().codeZone("222").zoneName("武汉市洪山区").regionList(regionVOSToList(RegionVO.builder().regionLevel(RegionLevel.AREA).region("洪山区").build()
+                , RegionVO.builder().regionLevel(RegionLevel.STUDENT_CODE).region("123").build())).build());
         map.put("华师一附中", studentRecruitToList(SchoolInfoVO.builder().schoolId("光谷实验中学").recruitList(list2).type("1").personNum(2).build()));
         List<RecruitVO> list3 = new ArrayList<>();
-        List<RegionVO> regionVOS3 = new ArrayList<>();
-        regionVOS3.add(RegionVO.builder().regionLevel(RegionLevel.AREA).region("洪山区").build());
-        regionVOS3.add(RegionVO.builder().regionLevel(RegionLevel.STUDENT_CODE).region("p8").build());
-        list3.add(RecruitVO.builder().codeZone("333").zoneName("武汉市洪山区").regionList(regionVOS3).build());
+        list3.add(RecruitVO.builder().codeZone("333").zoneName("武汉市洪山区").regionList(regionVOSToList(RegionVO.builder().regionLevel(RegionLevel.AREA).region("洪山区").build()
+                , RegionVO.builder().regionLevel(RegionLevel.STUDENT_CODE).region("p8").build())).build());
         List<RecruitVO> list4 = new ArrayList<>();
-        List<RegionVO> regionVOS4 = new ArrayList<>();
-        regionVOS4.add(RegionVO.builder().regionLevel(RegionLevel.TOWN).region("佛祖岭街道").build());
-        regionVOS4.add(RegionVO.builder().regionLevel(RegionLevel.TOWN).region("光谷大道").build());
-        list4.add(RecruitVO.builder().codeZone("333").zoneName("东湖高新区").regionList(regionVOS4).build());
+        list4.add(RecruitVO.builder().codeZone("333").zoneName("东湖高新区").regionList(regionVOSToList(RegionVO.builder().regionLevel(RegionLevel.TOWN).region("佛祖岭街道").build()
+                , RegionVO.builder().regionLevel(RegionLevel.TOWN).region("光谷大道").build())).build());
         map.put("洪山高中", studentRecruitToList(SchoolInfoVO.builder().schoolId("洪山高中").recruitList(list3).type("1").personNum(2).build(), SchoolInfoVO.builder().schoolId("洪山高中").recruitList(list4).type("2").personNum(2).build()));
         rankService.initMemory(examId, studentList, map);
     }
