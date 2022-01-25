@@ -20,7 +20,7 @@ public interface IRankService {
      *
      * @param examId
      * @param studentList
-     * @param schoolInfoMap
+     * @param schoolInfoMap key为schoolId
      * @return
      */
     boolean initMemory(String examId, List<StudentInfoVO> studentList, Map<String, List<SchoolInfoVO>> schoolInfoMap);
