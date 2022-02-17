@@ -11,6 +11,9 @@ import com.liwei.redisstudy.service.RedisService;
 import com.liwei.redisstudy.vo.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.RedisOperations;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -73,8 +76,6 @@ public class RankServiceImpl implements IRankService {
 
     @Override
     public boolean executeRank(String examId) {
-        //初始化
-        init(examId);
         String calcTime = String.valueOf(System.currentTimeMillis());
         String studentResultKey = RedisKeyBuilder.getKeyHashStudentResult(examId);
         String studentKey = RedisKeyBuilder.getKeyHashStudent(examId);
@@ -138,12 +139,37 @@ public class RankServiceImpl implements IRankService {
                 }
             }
         }
-        //批量写入redis
-        for (String key : schoolRankMap.keySet()) {
-            redisService.lPushBatch(key, schoolRankMap.get(key));
-        }
-        redisService.hmBatchSet(studentResultKey, studentRankMap);
+        saveResult(examId, schoolRankMap, studentRankMap, studentResultKey);
         return true;
+    }
+
+    /**
+     * 保存结果数据
+     */
+    private void saveResult(String examId, Map<String, List<Object>> schoolRankMap, Map<Object, Object> studentRankMap, String studentResultKey) {
+        redisService.getRedisTemplate().execute(new SessionCallback() {
+            @Override
+            public Object execute(RedisOperations operations) throws DataAccessException {
+                String keyHashStudentResult = RedisKeyBuilder.getKeyHashStudentResult(examId);
+                boolean flag = operations.hasKey(keyHashStudentResult);
+                String schoolRankPattern = RedisKeyBuilder.getKeyZsetSchoolRank(examId, "*", "*", "*");
+                Set<String> schoolRankSets = operations.keys(schoolRankPattern);
+                operations.multi();
+                if (flag) {
+                    operations.delete(keyHashStudentResult);
+                }
+                if (!CollectionUtils.isEmpty(schoolRankSets)) {
+                    operations.delete(schoolRankSets);
+                }
+                for (String key : schoolRankMap.keySet()) {
+                    operations.opsForList().rightPushAll(key, schoolRankMap.get(key));
+                }
+                if (!CollectionUtils.isEmpty(studentRankMap)) {
+                    operations.opsForHash().putAll(studentResultKey, studentRankMap);
+                }
+                return operations.exec();
+            }
+        });
     }
 
     private boolean isMatchRecruit(StudentInfoVO studentInfoVO, RecruitVO recruitVO) {
@@ -223,7 +249,7 @@ public class RankServiceImpl implements IRankService {
      * @param
      * @return
      */
-    private void init(String examId) {
+    private void clearResult(String examId) {
         String keyHashStudentResult = RedisKeyBuilder.getKeyHashStudentResult(examId);
         redisService.remove(keyHashStudentResult);
 
